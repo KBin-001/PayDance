@@ -28,11 +28,14 @@ Copy, images, and low-risk documentation may go straight to `main`. Features, bu
 CI trims jobs by changed files (`scripts/ci-change-scope.mjs`), and both gates check only the jobs judged necessary. A green gate does not mean everything ran:
 
 - Documentation-only changes run the metadata job alone; frontend, Rust, Web Preview QA, security audit, and CodeQL are all skipped.
+- Security audits are scoped per ecosystem: npm audit runs only when `package.json` / `package-lock.json` change, cargo audit and cargo deny only when `src-tauri/Cargo.*`, `deny.toml`, or `.cargo/audit.toml` change, and gitleaks always runs. An npm-only Dependabot pull request is no longer blocked by a Rust advisory, and vice versa.
+- Every day at 06:00 Asia/Shanghai, CI reruns every audit against main; a failure opens or updates the issue "Scheduled dependency audit failed", which closes itself once the audit passes again.
 - Changes under `scripts/` trigger CodeQL, but Vitest belongs to the frontend job and runs only when frontend files change. Run `npm test` locally after editing a script.
 
 ## Dependency Updates
 
 - Dependabot is configured in `.github/dependabot.yml`: npm, cargo, and github-actions, checked every Monday at 09:00 Asia/Shanghai, one group per ecosystem, no automerge. Its own pull requests are exempt from the DCO gate as long as the commits stay within dependency manifests and workflow files; the rule lives in `scripts/check-dco.mjs`.
+- RustSec advisories missing from the GitHub Advisory Database (usually transitive crates behind tauri / reqwest, such as rustls in 2026-09) produce no Dependabot alert or pull request; only the scheduled audit catches them. Follow the issue: run `cargo update -p <crate>` in `src-tauri`, then `npm run push:main`.
 - Upgrades deliberately held back live in two places that must stay in sync: the `ignore` block in `dependabot.yml`, and the test "keeps the upgrades that are blocked upstream pinned with a reason" in `scripts/repository-metadata.test.js`. Two entries today:
   - `typescript` stays on 6.x: TypeScript 7 is the native port, vue-tsc cannot resolve `tsc.js` from it, and typescript-eslint refuses to load.
   - `@types/node` stays on 24.x to track the runtime major. Once Node 26 reaches LTS, move every CI `node-version` to 26, lift this block, and drop the matching test assertion.

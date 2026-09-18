@@ -7,6 +7,10 @@ on:
   pull_request:
     branches:
       - main
+  # 每天 06:00（Asia/Shanghai）对 main 重跑依赖审计：公告随时发布，不该等到下一条
+  # 无关提交或 Dependabot PR 撞上才发现。只跑 security job，失败开 issue。
+  schedule:
+    - cron: "0 22 * * *"
 
 permissions:
   contents: read
@@ -28,6 +32,8 @@ jobs:
       requires_rust: ${{ steps.scope.outputs.requires_rust }}
       requires_web_preview_qa: ${{ steps.scope.outputs.requires_web_preview_qa }}
       requires_security: ${{ steps.scope.outputs.requires_security }}
+      requires_npm_audit: ${{ steps.scope.outputs.requires_npm_audit }}
+      requires_cargo_audit: ${{ steps.scope.outputs.requires_cargo_audit }}
       deploy_web_preview: ${{ steps.scope.outputs.deploy_web_preview }}
 
     steps:
@@ -47,6 +53,7 @@ jobs:
           base="${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}"
           head="${{ github.sha }}"
           node scripts/ci-change-scope.mjs \
+            --event "${{ github.event_name }}" \
             --base "$base" \
             --head "$head" \
             --github-output "$GITHUB_OUTPUT" \
@@ -215,6 +222,10 @@ jobs:
       - metadata
     if: needs.changes.outputs.requires_security == 'true'
     runs-on: ubuntu-latest
+    # issues: write 只为定时审计失败时开 issue；push / PR 事件里不会走到那一步。
+    permissions:
+      contents: read
+      issues: write
 
     steps:
       - name: Checkout
@@ -228,10 +239,14 @@ jobs:
           node-version: 24
           cache: npm
 
+      # npm 与 cargo 审计按各自清单是否变化裁剪（定时审计两者都跑），
+      # 规则在 scripts/ci-change-scope.mjs；gitleaks 扫整个历史，始终跑。
       - name: Install frontend dependencies
+        if: needs.changes.outputs.requires_npm_audit == 'true'
         run: npm ci
 
       - name: Audit all npm dependencies
+        if: needs.changes.outputs.requires_npm_audit == 'true'
         run: npm audit --audit-level=high
 
       # 后续审计步骤统一带 `if: '!cancelled()'`：任一审计失败时其余仍然执行，
@@ -254,7 +269,7 @@ jobs:
         run: gitleaks detect --config .gitleaks.toml --verbose
 
       - name: Install cargo-audit (pre-built)
-        if: "!cancelled()"
+        if: "!cancelled() && needs.changes.outputs.requires_cargo_audit == 'true'"
         run: |
           version="0.22.2"
           url="https://github.com/rustsec/rustsec/releases/download/cargo-audit/v${version}/cargo-audit-x86_64-unknown-linux-gnu-v${version}.tgz"
@@ -265,12 +280,12 @@ jobs:
           sudo mv "cargo-audit-x86_64-unknown-linux-gnu-v${version}/cargo-audit" /usr/local/bin/
 
       - name: Audit Rust dependencies
-        if: "!cancelled()"
+        if: "!cancelled() && needs.changes.outputs.requires_cargo_audit == 'true'"
         run: cargo audit
         working-directory: src-tauri
 
       - name: Install cargo-deny (pre-built)
-        if: "!cancelled()"
+        if: "!cancelled() && needs.changes.outputs.requires_cargo_audit == 'true'"
         run: |
           version="0.20.2"
           url="https://github.com/EmbarkStudios/cargo-deny/releases/download/${version}/cargo-deny-${version}-x86_64-unknown-linux-musl.tar.gz"
@@ -281,9 +296,42 @@ jobs:
           sudo mv "cargo-deny-${version}-x86_64-unknown-linux-musl/cargo-deny" /usr/local/bin/
 
       - name: Check Rust dependency licenses and sources
-        if: "!cancelled()"
+        if: "!cancelled() && needs.changes.outputs.requires_cargo_audit == 'true'"
         run: cargo deny check
         working-directory: src-tauri
+
+      # 定时审计的结论落到一个 issue 上：失败时开或追加评论，恢复后自动关闭。
+      # GitHub 公告库没收录的 RustSec 公告 Dependabot 不会开 PR，只有这里能看到。
+      - name: Track scheduled audit result in an issue
+        if: "!cancelled() && github.event_name == 'schedule'"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="定时依赖审计失败 / Scheduled dependency audit failed"
+          number="$(gh issue list --state open --label dependencies --search "\"$title\" in:title" --json number --jq '.[0].number // empty')"
+
+          if [ "$JOB_STATUS" = "success" ]; then
+            if [ -n "$number" ]; then
+              gh issue close "$number" --comment "定时审计已恢复通过：$RUN_URL"
+            fi
+            exit 0
+          fi
+
+          body="main 的定时依赖审计失败：$RUN_URL
+
+          - npm 公告：等 Dependabot 的安全更新 PR，或本地 \`npm audit fix\` 后推送。
+          - Rust 公告：日志里 cargo-deny 会给出 \`cargo update -p <crate>\`，在 \`src-tauri\` 下执行后 \`npm run push:main\`。
+          - 确认不影响 Windows 构建的公告：在 \`src-tauri/.cargo/audit.toml\` 里带理由忽略。
+
+          审计恢复通过后本 issue 自动关闭。"
+
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --body "$body"
+          else
+            gh issue create --title "$title" --label dependencies --body "$body"
+          fi
 
   gate:
     name: CI gate

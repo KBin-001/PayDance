@@ -9,7 +9,7 @@ import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { describe, expect, it } from "vitest";
 
-import { classifyChangedFiles } from "./ci-change-scope.mjs";
+import { classifyChangedFiles, scheduledAuditScope } from "./ci-change-scope.mjs";
 
 const scriptPath = resolve(import.meta.dirname, "ci-change-scope.mjs");
 
@@ -54,6 +54,8 @@ describe("CI change scope", () => {
     expect(result.requiresRust).toBe(false);
     expect(result.requiresWebPreviewQa).toBe(false);
     expect(result.requiresSecurity).toBe(false);
+    expect(result.requiresNpmAudit).toBe(false);
+    expect(result.requiresCargoAudit).toBe(false);
     expect(result.requiresCodeql).toBe(false);
     expect(result.deployWebPreview).toBe(false);
     expect(result.reasons).toContain("all changed files are lightweight");
@@ -89,7 +91,22 @@ describe("CI change scope", () => {
       requiresRust: false,
       requiresWebPreviewQa: true,
       requiresSecurity: true,
+      requiresNpmAudit: true,
+      requiresCargoAudit: false,
       requiresCodeql: false,
+      requiresWindowsBuild: true,
+    });
+
+    expect(classifyChangedFiles(["src-tauri/Cargo.lock"])).toMatchObject({
+      scope: "full",
+      requiresFullCi: true,
+      requiresFrontend: false,
+      requiresRust: true,
+      requiresWebPreviewQa: false,
+      requiresSecurity: true,
+      requiresNpmAudit: false,
+      requiresCargoAudit: true,
+      requiresCodeql: true,
       requiresWindowsBuild: true,
     });
 
@@ -135,6 +152,8 @@ describe("CI change scope", () => {
       requiresRust: false,
       requiresWebPreviewQa: false,
       requiresSecurity: true,
+      requiresNpmAudit: false,
+      requiresCargoAudit: false,
       requiresCodeql: true,
       requiresWindowsBuild: false,
     });
@@ -146,9 +165,116 @@ describe("CI change scope", () => {
       requiresRust: true,
       requiresWebPreviewQa: true,
       requiresSecurity: true,
+      requiresNpmAudit: true,
+      requiresCargoAudit: true,
       requiresCodeql: true,
       requiresWindowsBuild: true,
     });
+  });
+
+  // 一条 Rust 公告不该拦下只改 npm 的 Dependabot PR，反之亦然：审计结论只由
+  // 各自的锁文件决定，跑另一边的审计对这个 PR 没有任何判别价值。
+  it("scopes npm and cargo audits to their own manifests", () => {
+    expect(classifyChangedFiles(["package.json"])).toMatchObject({
+      requiresNpmAudit: true,
+      requiresCargoAudit: false,
+    });
+    expect(classifyChangedFiles(["src-tauri/Cargo.toml"])).toMatchObject({
+      requiresNpmAudit: false,
+      requiresCargoAudit: true,
+    });
+    expect(classifyChangedFiles(["src-tauri/deny.toml"])).toMatchObject({
+      requiresNpmAudit: false,
+      requiresCargoAudit: true,
+    });
+    expect(classifyChangedFiles(["src-tauri/.cargo/audit.toml"])).toMatchObject({
+      requiresNpmAudit: false,
+      requiresCargoAudit: true,
+    });
+    // 审计 job 本身的定义变了，两边都要重跑。
+    expect(classifyChangedFiles([".github/workflows/ci.yml"])).toMatchObject({
+      requiresSecurity: true,
+      requiresNpmAudit: true,
+      requiresCargoAudit: true,
+    });
+    // 只跑 gitleaks 的文件：security job 开着，两项依赖审计都关。
+    for (const file of [
+      ".gitleaks.toml",
+      ".github/dependabot.yml",
+      ".github/workflows/release.yml",
+      ".github/workflows/post-release-smoke.yml",
+    ]) {
+      expect(classifyChangedFiles([file]), file).toMatchObject({
+        requiresSecurity: true,
+        requiresNpmAudit: false,
+        requiresCargoAudit: false,
+      });
+    }
+  });
+
+  // 定时审计只跑 security job：公告随时发布，只有按时重跑才能在它拦住下一条
+  // 无关提交之前发现；前端 / Rust / Web Preview / CodeQL 与改动无关，一律跳过。
+  it("runs only the security job for the scheduled audit", () => {
+    expect(scheduledAuditScope()).toEqual({
+      changedFiles: [],
+      scope: "scheduled-audit",
+      isLightweight: false,
+      requiresFullCi: false,
+      requiresWindowsBuild: false,
+      requiresFrontend: false,
+      requiresRust: false,
+      requiresWebPreviewQa: false,
+      requiresSecurity: true,
+      requiresNpmAudit: true,
+      requiresCargoAudit: true,
+      requiresCodeql: false,
+      deployWebPreview: false,
+      reasons: ["scheduled dependency audit"],
+    });
+
+    withTempDir((cwd) => {
+      const outputPath = join(cwd, "github-output.txt");
+      const jsonPath = join(cwd, "scope.json");
+
+      execFileSync(
+        "node",
+        [
+          scriptPath,
+          "--event",
+          "schedule",
+          "--base",
+          "0123456789abcdef0123456789abcdef01234567",
+          "--head",
+          "HEAD",
+          "--github-output",
+          outputPath,
+          "--json-file",
+          jsonPath,
+        ],
+        { encoding: "utf8" },
+      );
+
+      const output = readFileSync(outputPath, "utf8");
+      const summary = JSON.parse(readFileSync(jsonPath, "utf8"));
+
+      expect(output).toContain("scope=scheduled-audit");
+      expect(output).toContain("requires_frontend=false");
+      expect(output).toContain("requires_rust=false");
+      expect(output).toContain("requires_web_preview_qa=false");
+      expect(output).toContain("requires_security=true");
+      expect(output).toContain("requires_npm_audit=true");
+      expect(output).toContain("requires_cargo_audit=true");
+      expect(output).toContain("requires_codeql=false");
+      expect(output).toContain("deploy_web_preview=false");
+      expect(summary.deployWebPreview).toBe(false);
+    });
+
+    // 其它事件名不改变按文件分类的结果。
+    expect(
+      execFileSync("node", [scriptPath, "--event", "push", "--files", "README.md"], {
+        encoding: "utf8",
+      }),
+    ).toContain('"scope": "lightweight"');
   });
 
   it("deploys Web Preview only for web-affecting full-CI changes", () => {
@@ -176,6 +302,8 @@ describe("CI change scope", () => {
     expect(result.requiresRust).toBe(true);
     expect(result.requiresWebPreviewQa).toBe(true);
     expect(result.requiresSecurity).toBe(true);
+    expect(result.requiresNpmAudit).toBe(true);
+    expect(result.requiresCargoAudit).toBe(true);
     expect(result.requiresCodeql).toBe(true);
     expect(result.reasons).toContain("no changed files detected");
   });
@@ -209,6 +337,8 @@ describe("CI change scope", () => {
       expect(output).toContain("requires_rust=false");
       expect(output).toContain("requires_web_preview_qa=false");
       expect(output).toContain("requires_security=false");
+      expect(output).toContain("requires_npm_audit=false");
+      expect(output).toContain("requires_cargo_audit=false");
       expect(output).toContain("requires_codeql=false");
       expect(output).toContain("deploy_web_preview=false");
       expect(summary.changedFiles).toEqual(["README.md", "legal/ADDITIONAL_TERMS.md"]);

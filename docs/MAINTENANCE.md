@@ -28,11 +28,14 @@
 CI 按改动文件裁剪 job（`scripts/ci-change-scope.mjs`），两个 gate 只校验被判定为必需的 job，绿灯不等于全量检查跑过：
 
 - 纯文档改动只跑 metadata job，前端、Rust、Web Preview QA、安全审计和 CodeQL 全部跳过。
+- 安全审计按生态裁剪：npm audit 只在 `package.json` / `package-lock.json` 变化时跑，cargo audit 与 cargo deny 只在 `src-tauri/Cargo.*`、`deny.toml`、`.cargo/audit.toml` 变化时跑，gitleaks 始终跑。只改 npm 的 Dependabot PR 不会被一条 Rust 公告拦下，反之亦然。
+- 每天 06:00（Asia/Shanghai）CI 定时对 main 跑全部审计；失败时开或追加 issue「定时依赖审计失败」，恢复后自动关闭。
 - `scripts/` 下的改动会触发 CodeQL，但 Vitest 挂在前端 job 上，只在前端文件变化时运行；改完脚本要在本地跑 `npm test`。
 
 ## 依赖更新
 
 - Dependabot 配置在 `.github/dependabot.yml`：覆盖 npm、cargo、github-actions，每周一 09:00（Asia/Shanghai）检查，每个 ecosystem 一个分组，不开自动合并。它自己开的 PR 在 DCO 门禁里有豁免，前提是提交只落在依赖清单与 workflow 文件内，规则在 `scripts/check-dco.mjs`。
+- GitHub 公告库没收录的 RustSec 公告（多在 tauri / reqwest 这类传递依赖里，如 2026-09 的 rustls）不会产生 Dependabot 告警或 PR，只有定时审计能发现：按 issue 提示在 `src-tauri` 下 `cargo update -p <crate>`，再 `npm run push:main`。
 - 故意不升的依赖写在两处并保持同步：`dependabot.yml` 的 `ignore`，以及 `scripts/repository-metadata.test.js` 里 "keeps the upgrades that are blocked upstream pinned with a reason"。当前两条：
   - `typescript` 锁在 6.x：TS 7 是原生移植版，vue-tsc 解析不到 `tsc.js`，typescript-eslint 拒绝加载。
   - `@types/node` 锁在 24.x，跟随运行时主版本。Node 26 转为 LTS 后，把 CI 各处 `node-version` 推到 26，放开这条封锁并删掉对应测试断言。

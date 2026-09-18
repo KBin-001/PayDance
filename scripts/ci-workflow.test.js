@@ -84,7 +84,7 @@ describe("CI workflow routing", () => {
     expect(ciWorkflow).toContain("Security audit");
     expect(ciWorkflow).toContain("if: needs.changes.outputs.requires_security == 'true'");
     expect(ciWorkflow).toMatch(
-      /- name: Audit all npm dependencies\r?\n\s+run: npm audit --audit-level=high(?:\r?\n|$)/,
+      /- name: Audit all npm dependencies\r?\n\s+if: needs\.changes\.outputs\.requires_npm_audit == 'true'\r?\n\s+run: npm audit --audit-level=high(?:\r?\n|$)/,
     );
     expect(ciWorkflow).not.toMatch(/\bnpm audit\b[^\r\n]*(?:--omit(?:=|\s+)dev)\b/);
     expect(ciWorkflow).not.toMatch(/\bNPM_CONFIG_OMIT:\s*dev\b/);
@@ -112,6 +112,46 @@ describe("CI workflow routing", () => {
     expect(webPreviewWorkflow).toContain(
       "github.event.workflow_run.conclusion == 'success'",
     );
+  });
+
+  // 一条 Rust 公告曾把只改 npm 的 Dependabot PR 拦红（RUSTSEC-2026-0285，2026-09）：
+  // 审计结论只由各自锁文件决定，所以 npm / cargo 审计按清单裁剪，gitleaks 始终跑；
+  // 新公告靠每日定时审计发现并落到 issue，而不是等下一条无关提交撞上。
+  it("scopes dependency audits per ecosystem and reruns them on a schedule", () => {
+    const ciWorkflow = readRoot(".github/workflows/ci.yml");
+
+    expect(ciWorkflow).toMatch(/schedule:\r?\n\s+- cron: "[^"]+"/);
+    expect(ciWorkflow).toContain('--event "${{ github.event_name }}"');
+    expect(ciWorkflow).toContain("requires_npm_audit");
+    expect(ciWorkflow).toContain("requires_cargo_audit");
+    expect(ciWorkflow).toMatch(
+      /- name: Install frontend dependencies\r?\n\s+if: needs\.changes\.outputs\.requires_npm_audit == 'true'\r?\n\s+run: npm ci/,
+    );
+    for (const step of [
+      "Install cargo-audit (pre-built)",
+      "Audit Rust dependencies",
+      "Install cargo-deny (pre-built)",
+      "Check Rust dependency licenses and sources",
+    ]) {
+      expect(ciWorkflow, step).toMatch(
+        new RegExp(
+          `- name: ${step.replaceAll("(", "\\(").replaceAll(")", "\\)")}\\r?\\n\\s+if: "!cancelled\\(\\) && needs\\.changes\\.outputs\\.requires_cargo_audit == 'true'"`,
+        ),
+      );
+    }
+    // gitleaks 不按生态裁剪。
+    expect(ciWorkflow).toMatch(
+      /- name: Run gitleaks \(detect secrets in git history\)\r?\n\s+if: "!cancelled\(\)"\r?\n/,
+    );
+    // 定时审计的结论写进 issue；issues: write 只给这一个 job。
+    expect(ciWorkflow).toContain("Track scheduled audit result in an issue");
+    expect(ciWorkflow).toContain(
+      "if: \"!cancelled() && github.event_name == 'schedule'\"",
+    );
+    expect(ciWorkflow).toContain("gh issue create");
+    expect(ciWorkflow).toContain("gh issue close");
+    expect(ciWorkflow.match(/^\s+issues: write$/gm)).toHaveLength(1);
+    expect(ciWorkflow).toMatch(/^permissions:\r?\n\s+contents: read\r?\n\r?\n/m);
   });
 
   // 商业 / OEM / 白标授权只有在权属链条完整时才成立，而无签署提交造成的
