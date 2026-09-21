@@ -367,8 +367,6 @@ function assertReleaseAssets(releaseTag) {
     exe,
     `${exe}.sha256`,
     `${exe}.sig`,
-    "pay-dance-windows-x64.exe",
-    "pay-dance-windows-x64.exe.sha256",
     "latest.json",
     "pay-dance-sbom.spdx.json",
     "release-manifest.json",
@@ -376,6 +374,13 @@ function assertReleaseAssets(releaseTag) {
   const missing = requiredAssets.filter((asset) => !assetNames.has(asset));
   if (missing.length > 0) {
     fail(`Release ${releaseTag} is missing assets:\n${missing.join("\n")}`);
+  }
+
+  const executables = [...assetNames].filter((asset) => asset.endsWith(".exe"));
+  if (executables.length !== 1) {
+    fail(
+      `Release ${releaseTag} must carry exactly one .exe asset, found ${executables.length}:\n${executables.join("\n")}`,
+    );
   }
 
   console.log(`[release-workflow] Release assets verified: ${release.url}`);
