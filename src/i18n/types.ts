@@ -13,6 +13,8 @@
 export interface Messages {
   // ── Dashboard ───────────────────────────────────────────────────────────
   "dashboard.todayEarnings": string;
+  "dashboard.effectiveHourlyRate": string;
+  "dashboard.perHourUnit": string;
   "dashboard.tapToMini": string;
   "dashboard.doubleClickMini": string;
   "dashboard.statsLabel": string;

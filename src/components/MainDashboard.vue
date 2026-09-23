@@ -21,6 +21,7 @@ const props = defineProps<{
   amountMode: AmountMode;
   dailyEarnText: string;
   earnedText: string;
+  effectiveHourlyRateText: string;
   middleStat: DashboardMiddleStat;
   snapshot: SalarySnapshot;
   suspendAmountPulse: boolean;
@@ -39,6 +40,13 @@ const amountAriaLabel = computed(() =>
   t.value("dashboard.tapToMini", {
     amount: withCurrencySymbol(currencySymbol.value, props.earnedText),
   }),
+);
+
+// Today's earnings divided by the hours actually spent, so the caption carries the currency and
+// the hourly unit the dashboard model deliberately leaves out.
+const rateValueText = computed(
+  () =>
+    `${withCurrencySymbol(currencySymbol.value, props.effectiveHourlyRateText)}${t.value("dashboard.perHourUnit")}`,
 );
 </script>
 
@@ -63,6 +71,11 @@ const amountAriaLabel = computed(() =>
         :value="earnedText"
       />
     </button>
+
+    <p v-if="effectiveHourlyRateText" class="hero-rate">
+      <span class="hero-rate__label">{{ t("dashboard.effectiveHourlyRate") }}</span>
+      <strong class="hero-rate__value" v-text="rateValueText" />
+    </p>
 
     <div class="hero-controls">
       <section class="hero-dashboard" :aria-label="t('dashboard.statsLabel')">
@@ -121,6 +134,44 @@ const amountAriaLabel = computed(() =>
   place-items: center;
   margin-top: var(--hero-amount-gap);
   color: var(--text);
+}
+
+/* A caption on the amount rather than a third surface: it answers "at what rate", which only
+   matters right after the number it belongs to. Keeping it inside the amount layer is also what
+   stops the paid overtime of a future release from needing a new card. */
+.hero-rate {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.4em;
+  margin-top: clamp(1px, 0.6cqh, 5px);
+  color: var(--muted);
+  font-size: var(--ui-font-xs, 13px);
+  font-weight: 640;
+  line-height: 1.15;
+}
+
+/* The caption pays for itself out of the gap the dashboard already had: at the default window size
+   the hero already fills its box, so an extra line taken on credit would push the salary-info
+   entry past the bottom edge. */
+.hero-rate + .hero-controls {
+  margin-top: calc(var(--hero-dashboard-gap) - 8px);
+}
+
+/* Short containers also take a few pixels out of the quiet salary-info entry's lead-in, the only
+   slack left below the progress. That means the storefront mock, which squeezes the hero below
+   anything the desktop window can reach, and the desktop window's own 410-430px band. */
+@container (max-height: 430px) {
+  .hero-rate ~ .hero-controls .salary-info-button {
+    margin-top: calc(var(--salary-info-offset) - 7px);
+  }
+}
+
+.hero-rate__value {
+  color: var(--text);
+  font-family: var(--font-dashboard);
+  font-weight: 720;
+  font-variant-numeric: tabular-nums;
 }
 
 .hero-controls {

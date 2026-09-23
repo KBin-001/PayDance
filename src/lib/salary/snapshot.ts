@@ -73,6 +73,12 @@ function getNextTransitionMs(
   return 0;
 }
 
+// Past this much overtime the program no longer assumes the user is still at work — it cannot tell
+// a late night from a forgotten window. Without a bound the rate keeps sliding for the whole gap
+// until the next shift (a night shift's end to its next start is sixteen hours), which turns the
+// number into noise. Freezing it keeps the last honest reading on screen instead.
+const maxOvertimeMs = 4 * 3_600_000;
+
 const fallbackT: ValidateT = (key: keyof Messages) => key;
 
 export function calculateSalarySnapshot(
@@ -100,10 +106,17 @@ export function calculateSalarySnapshot(
   }
 
   const nowMs = now.getTime();
-  const elapsedWorkMs = spans.reduce((sum, [start, end]) => {
+  const scheduledElapsedMs = spans.reduce((sum, [start, end]) => {
     const spanMs = end.getTime() - start.getTime();
     return sum + clamp(nowMs - start.getTime(), 0, spanMs);
   }, 0);
+
+  // Work time keeps running past the configured end. Freezing it at the planned hours is what used
+  // to make the day look finished the moment the clock struck the end time: the dashboard claimed
+  // the user was done, and the effective hourly rate could never fall.
+  const sessionEndMs = spans[spans.length - 1][1].getTime();
+  const overtimeMs = clamp(nowMs - sessionEndMs, 0, maxOvertimeMs);
+  const elapsedWorkMs = scheduledElapsedMs + overtimeMs;
 
   const dailySalary = getDailySalary(config, totalWorkMs);
   const workHours = totalWorkMs / 3_600_000;
@@ -111,6 +124,12 @@ export function calculateSalarySnapshot(
   const minuteRate = hourlyRate / 60;
   const secondRate = minuteRate / 60;
   const progress = clamp(elapsedWorkMs / totalWorkMs, 0, 1);
+  const earnedToday = dailySalary * progress;
+  // Unpaid overtime dilutes the rate: the money stops at the planned day while the hours keep
+  // coming. With no overtime to account for, the rate is taken from the configured figure instead
+  // of re-deriving it, so the display never flickers between 46.87 and 46.88 on a rounding error.
+  const effectiveHourlyRate =
+    overtimeMs > 0 ? earnedToday / (elapsedWorkMs / 3_600_000) : hourlyRate;
   const status = getSnapshotStatus(now, spans, elapsedWorkMs, totalWorkMs);
   const isWorking = status === "working";
   const nextTransitionMs = getNextTransitionMs(now, spans, status);
@@ -119,8 +138,9 @@ export function calculateSalarySnapshot(
     (status === "after-work" && spansTouchNightWorkWindow(spans));
 
   return {
-    earnedToday: dailySalary * progress,
+    earnedToday,
     dailySalary,
+    effectiveHourlyRate,
     hourlyRate,
     minuteRate,
     secondRate,

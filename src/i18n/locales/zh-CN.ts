@@ -8,6 +8,8 @@ import type { Messages } from "../types";
 const zhCN: Messages = {
   // ── Dashboard ───────────────────────────────────────────────────────────
   "dashboard.todayEarnings": "今日入账",
+  "dashboard.effectiveHourlyRate": "当前时薪",
+  "dashboard.perHourUnit": "/h",
   "dashboard.tapToMini": "今日入账 {amount}，双击或按 Enter 进入迷你悬浮模式",
   "dashboard.doubleClickMini": "双击进入迷你悬浮模式",
   "dashboard.statsLabel": "今日收入看板",

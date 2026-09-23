@@ -33,6 +33,7 @@ export type SalaryConfig = {
 export type SalarySnapshot = {
   earnedToday: number;
   dailySalary: number;
+  effectiveHourlyRate: number;
   hourlyRate: number;
   minuteRate: number;
   secondRate: number;
@@ -74,6 +75,7 @@ export const defaultSalaryConfig: SalaryConfig = {
 export const emptySnapshot: SalarySnapshot = {
   earnedToday: 0,
   dailySalary: 0,
+  effectiveHourlyRate: 0,
   hourlyRate: 0,
   minuteRate: 0,
   secondRate: 0,

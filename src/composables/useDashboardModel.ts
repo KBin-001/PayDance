@@ -50,6 +50,14 @@ export function useDashboardModel(
   const workedTimeText = computed(() =>
     formatDashboardDuration(snapshot.value.elapsedWorkMs),
   );
+  // While the config is invalid the rate is unknown rather than zero, so the dashboard drops the
+  // line instead of reporting a number it cannot stand behind. A rest day still reads zero: there
+  // the day genuinely earns nothing.
+  const effectiveHourlyRateText = computed(() =>
+    hasConfigIssues.value
+      ? ""
+      : formatYuan(snapshot.value.effectiveHourlyRate, locale.value),
+  );
   const middleStat = computed<DashboardMiddleStat>(() => {
     if (hasConfigIssues.value) {
       return { label: t("status.invalidConfig"), value: "--" };
@@ -89,6 +97,7 @@ export function useDashboardModel(
   return {
     dailyEarnText,
     earnedText,
+    effectiveHourlyRateText,
     firstConfigIssue,
     hasConfigIssues,
     hasIssue,

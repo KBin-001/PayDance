@@ -8,6 +8,8 @@ import type { Messages } from "../types";
 const en: Messages = {
   // ── Dashboard ───────────────────────────────────────────────────────────
   "dashboard.todayEarnings": "Today's Earnings",
+  "dashboard.effectiveHourlyRate": "Current rate",
+  "dashboard.perHourUnit": "/h",
   "dashboard.tapToMini":
     "Today's earnings {amount}. Double-click or press Enter to enter mini floating mode",
   "dashboard.doubleClickMini": "Double-click for mini floating mode",

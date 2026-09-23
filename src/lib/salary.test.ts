@@ -759,6 +759,117 @@ describe("big week night shifts (大小周跨零点夜班)", () => {
   });
 });
 
+describe("effective hourly rate (实际时薪)", () => {
+  // ¥375 for the 8-hour day above, with no overtime pay of any kind.
+  const unpaidOvertimeConfig: SalaryConfig = {
+    ...config,
+    salaryType: "daily",
+    dailySalary: 375,
+  };
+
+  it("equals the configured hourly rate while working normally, in every salary mode", () => {
+    // All three modes describe the same 8-hour day: ¥1000/day, ¥900/day, ¥90/h.
+    const monthly = calculateSalarySnapshot(at("10:00"), config);
+    const daily = calculateSalarySnapshot(at("10:00"), {
+      ...config,
+      salaryType: "daily",
+      dailySalary: 900,
+    });
+    const hourly = calculateSalarySnapshot(at("10:00"), {
+      ...config,
+      salaryType: "hourly",
+      hourlyRate: 90,
+    });
+
+    expect(monthly.effectiveHourlyRate).toBe(125);
+    expect(daily.effectiveHourlyRate).toBe(112.5);
+    expect(hourly.effectiveHourlyRate).toBe(90);
+  });
+
+  it("drops while overtime hours earn nothing extra", () => {
+    // The worked example from the spec: ¥375 for an 8-hour day, then two unpaid overtime hours.
+    const normalHours = calculateSalarySnapshot(at("10:00"), unpaidOvertimeConfig);
+    const overtime = calculateSalarySnapshot(at("20:00"), unpaidOvertimeConfig);
+
+    expect(normalHours.effectiveHourlyRate).toBe(46.875);
+    expect(overtime.status).toBe("after-work");
+    expect(overtime.earnedToday).toBe(375);
+    expect(overtime.progress).toBe(1);
+    expect(overtime.elapsedWorkMs).toBe(10 * 3_600_000);
+    expect(overtime.effectiveHourlyRate).toBe(37.5);
+  });
+
+  it("stops counting overtime at four hours past the end time", () => {
+    // 18:00 end: 22:00 is the fourth overtime hour, 23:00 is already past the point where the
+    // program still assumes the user is at work.
+    const atCap = calculateSalarySnapshot(at("22:00"), unpaidOvertimeConfig);
+    const pastCap = calculateSalarySnapshot(at("23:00"), unpaidOvertimeConfig);
+
+    expect(atCap.elapsedWorkMs).toBe(12 * 3_600_000);
+    expect(atCap.effectiveHourlyRate).toBe(31.25);
+    expect(pastCap.elapsedWorkMs).toBe(atCap.elapsedWorkMs);
+    expect(pastCap.effectiveHourlyRate).toBe(atCap.effectiveHourlyRate);
+  });
+
+  it("holds through the lunch break", () => {
+    const beforeLunch = calculateSalarySnapshot(at("12:00"), config);
+    const duringLunch = calculateSalarySnapshot(at("12:30"), config);
+
+    expect(duringLunch.effectiveHourlyRate).toBe(beforeLunch.effectiveHourlyRate);
+  });
+
+  it("shows the configured rate before work starts", () => {
+    const snapshot = calculateSalarySnapshot(at("08:59"), config);
+
+    expect(snapshot.elapsedWorkMs).toBe(0);
+    expect(snapshot.effectiveHourlyRate).toBe(125);
+  });
+
+  it("is zero on a rest day and zero while the config is invalid", () => {
+    const restDay = calculateSalarySnapshot(new Date("2026-05-10T10:00:00"), config);
+    const invalid = calculateSalarySnapshot(at("10:00"), {
+      ...config,
+      salaryType: "daily",
+      dailySalary: 0,
+    });
+
+    expect(restDay.status).toBe("rest-day");
+    expect(restDay.effectiveHourlyRate).toBe(0);
+    expect(invalid.status).toBe("invalid-config");
+    expect(invalid.effectiveHourlyRate).toBe(0);
+  });
+
+  it("dilutes an overtime hour after an overnight shift and starts fresh on the next one", () => {
+    const nightShiftConfig: SalaryConfig = {
+      ...config,
+      salaryType: "daily",
+      dailySalary: 900,
+      workdays: [1, 2],
+      startTime: "22:00",
+      endTime: "06:00",
+      enableLunchBreak: false,
+    };
+
+    // Monday 22:00–06:00 earns ¥900; 07:00 the next morning is one unpaid overtime hour.
+    const afterNightShift = calculateSalarySnapshot(
+      new Date("2026-05-12T07:00:00"),
+      nightShiftConfig,
+    );
+    // That night's own shift starts at 22:00, half an hour before this reading.
+    const nextShift = calculateSalarySnapshot(
+      new Date("2026-05-12T22:30:00"),
+      nightShiftConfig,
+    );
+
+    expect(afterNightShift.status).toBe("after-work");
+    expect(afterNightShift.elapsedWorkMs).toBe(9 * 3_600_000);
+    expect(afterNightShift.effectiveHourlyRate).toBe(100);
+    expect(nextShift.status).toBe("working");
+    expect(nextShift.elapsedWorkMs).toBe(30 * 60_000);
+    expect(nextShift.effectiveHourlyRate).toBe(112.5);
+  });
+});
+
 describe("validateSalaryConfig big week", () => {
   const enabled: SalaryConfig = {
     ...config,
