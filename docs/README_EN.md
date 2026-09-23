@@ -38,7 +38,7 @@ The main window shows today's earnings, work progress, time remaining, and daily
 ## Features
 
 - **Live earnings**: Today's amount updates continuously and is shown to two decimal places.
-- **Common pay schedules**: Supports monthly, daily, and hourly pay, configurable workdays, lunch-break exclusion, and overnight shifts.
+- **Common pay schedules**: Supports monthly, daily, and hourly pay, configurable workdays, alternating big and small weeks, lunch-break exclusion, and overnight shifts.
 - **Mini window**: Shows only the amount, stays draggable and always on top, and supports 10%–100% opacity. Double-click it to restore the main window.
 - **Local-first**: No account required; your salary settings stay on your own machine.
 - **Bilingual UI**: The interface, tray menu, and validation messages support Simplified Chinese and English.

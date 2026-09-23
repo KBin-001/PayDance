@@ -109,6 +109,11 @@ const findBigWeekToggle = (wrapper: ReturnType<typeof mountSettingsPanel>) =>
     .findAll('input[type="checkbox"]')
     .find((input) => input.element.parentElement?.textContent?.includes("大小周模式"));
 
+const findExtraDayPicker = (wrapper: ReturnType<typeof mountSettingsPanel>) =>
+  wrapper
+    .findAll(".weekday-control")
+    .find((picker) => picker.attributes("aria-label") === "大周额外工作日");
+
 const findPhaseControl = (wrapper: ReturnType<typeof mountSettingsPanel>) =>
   wrapper
     .findAll('[role="radiogroup"]')
@@ -136,13 +141,12 @@ describe("SettingsPanel big week", () => {
       },
     });
 
-    const pickers = wrapper.findAll(".weekday-control");
-    expect(pickers).toHaveLength(2);
-    expect(pickers[1].attributes("aria-label")).toBe("大周额外工作日");
-    expect(pickers[1].findAll("button").map((button) => button.text())).toEqual([
-      "六",
-      "日",
-    ]);
+    expect(wrapper.findAll(".weekday-control")).toHaveLength(2);
+    expect(
+      findExtraDayPicker(wrapper)
+        ?.findAll("button")
+        .map((button) => button.text()),
+    ).toEqual(["六", "日"]);
   });
 
   it("aligns the big-week anchor to the current week when the toggle is switched on", async () => {
@@ -188,7 +192,7 @@ describe("SettingsPanel big week", () => {
       bigWeekEnabled: true,
       bigWeekExtraDays: [6],
     });
-    const extraDayButtons = wrapper.findAll(".weekday-control")[1].findAll("button");
+    const extraDayButtons = findExtraDayPicker(wrapper)?.findAll("button") ?? [];
 
     expect(extraDayButtons.map((button) => button.text())).toEqual(["六", "日"]);
 
@@ -205,7 +209,7 @@ describe("SettingsPanel big week", () => {
       (field) => field === "bigWeekExtraDays",
     );
 
-    expect(wrapper.findAll(".weekday-control")[1].classes()).toContain("is-invalid");
+    expect(findExtraDayPicker(wrapper)?.classes()).toContain("is-invalid");
   });
 
   it("keeps the alignment when the toggle is switched off and on again", async () => {
@@ -241,6 +245,22 @@ describe("SettingsPanel big week", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("explains what the toggle does to the workday picker above it", async () => {
+    const wrapper = mountSettingsPanel();
+
+    expect(wrapper.text()).not.toContain("上面的工作日表示小周");
+
+    await wrapper.setProps({
+      config: {
+        ...defaultSalaryConfig,
+        workdays: [...defaultSalaryConfig.workdays],
+        bigWeekEnabled: true,
+      },
+    });
+
+    expect(wrapper.text()).toContain("上面的工作日表示小周");
   });
 
   it("shows the phase control only while the toggle is on", async () => {
@@ -319,9 +339,8 @@ describe("SettingsPanel big week", () => {
       workdays: [...defaultSalaryConfig.workdays],
       bigWeekEnabled: true,
     });
-    const sundayButton = wrapper
-      .findAll(".weekday-control")[1]
-      .findAll("button")
+    const sundayButton = findExtraDayPicker(wrapper)
+      ?.findAll("button")
       .find((button) => button.text() === "日");
 
     await sundayButton?.trigger("click");

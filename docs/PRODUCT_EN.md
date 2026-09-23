@@ -29,7 +29,7 @@ New features should directly support viewing today's live earnings.
 ## Experience Principles
 
 - The main window shows the full dashboard; the mini window shows only the live amount.
-- Salary rules stay close to real schedules: monthly, daily, and hourly modes, weekly workdays, lunch-break exclusion, and night shifts crossing midnight.
+- Salary rules stay close to real schedules: monthly, daily, and hourly modes, weekly workdays, alternating big and small weeks, lunch-break exclusion, and night shifts crossing midnight.
 - Salary and schedule settings stay on the device, with no telemetry and no advertising.
 - Salary details and settings remain secondary to the dashboard.
 - Error messages stay concise, direct, and actionable.

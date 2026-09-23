@@ -105,9 +105,13 @@ const en: Messages = {
   // ── Settings → big week ────────────────────────────────────────────────
   "bigWeek.toggle": "Alternating work weeks",
   "bigWeek.extraDays": "Extra workdays in big weeks",
+  "bigWeek.hint":
+    "The workdays above describe the small week; big weeks add the extra days picked below.",
   "bigWeek.thisWeek": "This week is",
   "bigWeek.bigWeek": "Big week",
   "bigWeek.smallWeek": "Small week",
+  "bigWeek.monthlyWorkDaysHint":
+    "Alternating weeks raise the monthly average from about 21.7 workdays to about 23.9, so around 24 is usually the right value. This is only a hint; the number stays yours to set.",
 
   // ── Settings → amount mode ─────────────────────────────────────────────
   "amountMode.rolling": "Rolling",

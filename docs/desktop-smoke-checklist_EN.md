@@ -16,6 +16,11 @@ Use this checklist before releasing the Windows portable build. Record the PayDa
 ## Settings
 
 - [ ] Changing salary mode, amount, workdays, start and end times, or lunch settings updates the dashboard immediately.
+- [ ] Turning on "Alternating work weeks" makes the workday picker describe the small week and reveals "Extra workdays in big weeks" and "This week is"; switching the toggle off hides both again.
+- [ ] The extra workday of a big week shows "Working" on the dashboard and accrues today's earnings, while the same weekday of the neighbouring small week shows "Day Off" and 0.
+- [ ] Realigning with "This week is" updates the dashboard at once, and switching the toggle off and on again keeps the alignment.
+- [ ] Turning the toggle on with no extra workday, or with one the small week already works, shows "Needs Setup" with the offending setting highlighted.
+- [ ] Under monthly pay with alternating weeks on, a monthly work-days hint appears next to "Work days per month"; the app never changes that number itself.
 - [ ] Changing or clearing the currency symbol updates the settings preview, dashboard, today's estimate, salary details, and mini window; the choice persists after restart.
 - [ ] Changing theme, amount display mode, or always-on-top state updates the UI immediately and persists after restart.
 - [ ] Invalid salary settings show a clear error and do not overwrite the last valid salary configuration; theme, language, and window preferences can still be saved.

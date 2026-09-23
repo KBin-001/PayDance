@@ -102,6 +102,10 @@ const updateEnabled = (enabled: boolean) => {
       @update:model-value="updateEnabled"
     />
 
+    <p v-if="config.bigWeekEnabled" class="big-week-fields__hint">
+      {{ t("bigWeek.hint") }}
+    </p>
+
     <WorkdayPicker
       v-if="config.bigWeekEnabled"
       :density="density"
@@ -129,5 +133,14 @@ const updateEnabled = (enabled: boolean) => {
 .big-week-fields {
   display: grid;
   gap: clamp(9px, 2.1cqh, 12px);
+}
+
+.big-week-fields__hint {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-dashboard);
+  font-size: var(--ui-font-xs, 12px);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 </style>

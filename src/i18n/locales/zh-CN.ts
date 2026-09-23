@@ -103,9 +103,12 @@ const zhCN: Messages = {
   // ── Settings → big week ────────────────────────────────────────────────
   "bigWeek.toggle": "大小周模式",
   "bigWeek.extraDays": "大周额外工作日",
+  "bigWeek.hint": "上面的工作日表示小周（少的那一周），大周再加下面选的额外工作日。",
   "bigWeek.thisWeek": "本周是",
   "bigWeek.bigWeek": "大周",
   "bigWeek.smallWeek": "小周",
+  "bigWeek.monthlyWorkDaysHint":
+    "大小周让月均工作天数从约 21.7 天升到约 23.9 天，建议改成 24 左右；这里只是提示，数字由你自己定。",
 
   // ── Settings → amount mode ─────────────────────────────────────────────
   "amountMode.rolling": "滚动变换",

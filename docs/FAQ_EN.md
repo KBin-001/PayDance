@@ -57,6 +57,14 @@ It depends on your settings. With lunch-break exclusion on, the break is not cou
 
 Yes. When the end time is earlier than the start time, the shift is treated as crossing midnight, and earnings keep accumulating for that same shift past 00:00.
 
+### How do I set up alternating work weeks?
+
+Turn on "Alternating work weeks" under "Workdays". The workday picker then describes the "small" week (the one with fewer workdays), and "Extra workdays in big weeks" appears below it (Saturday by default, limited to the days that week leaves free). A config that has never been aligned takes the week you switch it on in as a big week, and the two alternate from there. If a week looks wrong, "This week is" next to it realigns on the spot — and switching the toggle off and on again does not reset an alignment you already made.
+
+### What should "Work days per month" be with alternating work weeks?
+
+Alternating weeks raise the monthly average from about 21.7 workdays to about 23.9, so around 24 is usually right under monthly pay; leaving it at 22 makes each day's share too high. PayDance only shows that hint in Settings and never changes the number for you.
+
 ### The amount is 0 or never moves
 
 Check the status at the left of the title bar first. "Day Off" means today is not one of your workdays; "Not Yet" and "Off Work" mean the current time is outside your working hours; "Lunch Break" means lunch exclusion is on; "Needs Setup" means a setting is invalid, and Settings shows which one. If none of these applies, check the system clock and time zone.

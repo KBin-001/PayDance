@@ -107,9 +107,13 @@ export interface Messages {
   // ── Settings → big week ────────────────────────────────────────────────
   "bigWeek.toggle": string;
   "bigWeek.extraDays": string;
+  "bigWeek.hint": string;
   "bigWeek.thisWeek": string;
   "bigWeek.bigWeek": string;
   "bigWeek.smallWeek": string;
+  // A five-day week averages 21.7 workdays a month and an alternating 5/6-day week 23.9:
+  // 5 (or 5.5) days x 365.25 / 12 / 7. Keep the copy in step with those two numbers.
+  "bigWeek.monthlyWorkDaysHint": string;
 
   // ── Settings → amount mode ─────────────────────────────────────────────
   "amountMode.rolling": string;
