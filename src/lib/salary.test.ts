@@ -30,6 +30,10 @@ const vt = (key: string) => {
     "validation.lunchSameError": "午休起止时间不能相同",
     "validation.nightLunchOutside": "夜班午休需在工时内",
     "validation.lunchOutside": "午休需在工时内",
+    "validation.bigWeekExtraDaysEmpty": "至少选 1 个大周额外工作日",
+    "validation.bigWeekExtraDaysError": "大周额外工作日必须是一周中的某天",
+    "validation.bigWeekExtraDaysOverlap": "大周额外工作日不能与小周工作日重复",
+    "validation.bigWeekAnchorError": "大周起始周无效，请重新对齐",
   };
   return map[key] ?? key;
 };
@@ -678,11 +682,130 @@ describe("big week (大小周)", () => {
     );
   });
 
-  it("falls back to a small week when the anchor is not a date", () => {
+  it("reports an unreadable anchor instead of silently resting", () => {
     const broken: SalaryConfig = { ...bigWeekConfig, bigWeekAnchor: "2026-02-31" };
 
     expect(calculateSalarySnapshot(new Date("2026-05-16T10:00:00"), broken).status).toBe(
-      "rest-day",
+      "invalid-config",
     );
+    expect(validateSalaryConfig(broken, vt).map((issue) => issue.field)).toContain(
+      "bigWeekAnchor",
+    );
+  });
+});
+
+describe("big week night shifts (大小周跨零点夜班)", () => {
+  // 2026-05-11 is a Monday, so 05-15 is the Friday of the big week and 05-22 the Friday of the
+  // small one; 05-16 and 05-23 are their Saturdays.
+  const nightShiftConfig: SalaryConfig = {
+    ...config,
+    startTime: "22:00",
+    endTime: "06:00",
+    enableLunchBreak: false,
+    bigWeekEnabled: true,
+    bigWeekExtraDays: [6],
+    bigWeekAnchor: "2026-05-11",
+  };
+
+  it("runs a Friday night shift past midnight into a big-week Saturday", () => {
+    const snapshot = calculateSalarySnapshot(
+      new Date("2026-05-16T02:00:00"),
+      nightShiftConfig,
+    );
+
+    expect(snapshot.status).toBe("working");
+    expect(snapshot.elapsedWorkMs).toBe(4 * 3_600_000);
+    expect(snapshot.isNightWork).toBe(true);
+  });
+
+  it("runs a Friday night shift past midnight into a small-week Saturday", () => {
+    const snapshot = calculateSalarySnapshot(
+      new Date("2026-05-23T02:00:00"),
+      nightShiftConfig,
+    );
+
+    expect(snapshot.status).toBe("working");
+    expect(snapshot.elapsedWorkMs).toBe(4 * 3_600_000);
+  });
+
+  it("works a big-week Saturday night through to Sunday", () => {
+    const snapshot = calculateSalarySnapshot(
+      new Date("2026-05-17T02:00:00"),
+      nightShiftConfig,
+    );
+
+    expect(snapshot.status).toBe("working");
+    expect(snapshot.isNightWork).toBe(true);
+  });
+
+  it("rests on a small-week Saturday night", () => {
+    const snapshot = calculateSalarySnapshot(
+      new Date("2026-05-24T02:00:00"),
+      nightShiftConfig,
+    );
+
+    expect(snapshot.status).toBe("rest-day");
+    expect(snapshot.earnedToday).toBe(0);
+  });
+
+  it("reports the finished night shift after a big-week Saturday night", () => {
+    const snapshot = calculateSalarySnapshot(
+      new Date("2026-05-17T07:00:00"),
+      nightShiftConfig,
+    );
+
+    expect(snapshot.status).toBe("after-work");
+    expect(snapshot.isNightWork).toBe(true);
+  });
+});
+
+describe("validateSalaryConfig big week", () => {
+  const enabled: SalaryConfig = {
+    ...config,
+    bigWeekEnabled: true,
+    bigWeekExtraDays: [6],
+    bigWeekAnchor: "2026-05-11",
+  };
+
+  it("accepts an enabled big week", () => {
+    expect(validateSalaryConfig(enabled, vt)).toHaveLength(0);
+  });
+
+  it("reports an enabled big week that has no extra day", () => {
+    expect(validateSalaryConfig({ ...enabled, bigWeekExtraDays: [] }, vt)).toEqual([
+      { field: "bigWeekExtraDays", message: "至少选 1 个大周额外工作日" },
+    ]);
+  });
+
+  it("reports an extra day that repeats a small-week workday", () => {
+    expect(validateSalaryConfig({ ...enabled, bigWeekExtraDays: [1, 6] }, vt)).toEqual([
+      { field: "bigWeekExtraDays", message: "大周额外工作日不能与小周工作日重复" },
+    ]);
+  });
+
+  it("reports an extra day that is not a day of the week", () => {
+    expect(validateSalaryConfig({ ...enabled, bigWeekExtraDays: [7] }, vt)).toEqual([
+      { field: "bigWeekExtraDays", message: "大周额外工作日必须是一周中的某天" },
+    ]);
+  });
+
+  it("reports an anchor that is not a date", () => {
+    expect(validateSalaryConfig({ ...enabled, bigWeekAnchor: "2026-02-31" }, vt)).toEqual(
+      [{ field: "bigWeekAnchor", message: "大周起始周无效，请重新对齐" }],
+    );
+  });
+
+  it("ignores the big-week fields while the toggle is off", () => {
+    const issues = validateSalaryConfig(
+      {
+        ...config,
+        bigWeekEnabled: false,
+        bigWeekExtraDays: [],
+        bigWeekAnchor: "not-a-date",
+      },
+      vt,
+    );
+
+    expect(issues).toHaveLength(0);
   });
 });

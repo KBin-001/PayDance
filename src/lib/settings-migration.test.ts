@@ -4,7 +4,7 @@
 // Additional terms: see /legal/ADDITIONAL_TERMS.md
 
 import { describe, expect, it } from "vitest";
-import { defaultBigWeekAnchor, defaultSalaryConfig } from "./salary";
+import { defaultSalaryConfig, validateSalaryConfig } from "./salary";
 import {
   migrateSalaryConfig,
   migrateVersionedSalaryConfig,
@@ -76,7 +76,7 @@ describe("settings migration", () => {
   });
 
   it("declares the v0.5 settings schema version", () => {
-    expect(settingsSchemaVersion).toBe(4);
+    expect(settingsSchemaVersion).toBe(5);
   });
 
   it("migrates saved configs through an explicit versioned chain", () => {
@@ -245,8 +245,39 @@ describe("settings migration — big week", () => {
 
     expect(result.config.bigWeekEnabled).toBe(false);
     expect(result.config.bigWeekExtraDays).toEqual([6]);
-    expect(result.config.bigWeekAnchor).toBe(defaultBigWeekAnchor);
+    expect(result.config.bigWeekAnchor).toBe("");
     expect(result.recoveryReason).toBeUndefined();
+  });
+
+  it("starts a v4 config unaligned instead of keeping its old placeholder phase", () => {
+    const result = recoverVersionedSalaryConfig({
+      config: {
+        ...configWithoutBigWeek,
+        bigWeekEnabled: true,
+        bigWeekAnchor: "2026-01-05",
+      },
+      schemaVersion: 4,
+    });
+
+    expect(result.config.bigWeekAnchor).toBe("");
+    // That anchor was never a phase the user picked, so the toggle cannot stay on with it.
+    expect(result.config.bigWeekEnabled).toBe(false);
+    expect(result.recoveryReason).toBe("invalid-values");
+  });
+
+  it("leaves a recovered config in a state that passes validation", () => {
+    const result = recoverVersionedSalaryConfig({
+      config: {
+        ...configWithoutBigWeek,
+        bigWeekEnabled: true,
+        bigWeekAnchor: "not-a-date",
+      },
+      schemaVersion: settingsSchemaVersion,
+    });
+
+    expect(result.config.bigWeekAnchor).toBe("");
+    expect(result.config.bigWeekEnabled).toBe(false);
+    expect(validateSalaryConfig(result.config, (key) => key)).toHaveLength(0);
   });
 
   it("keeps the toggle off when upgrading an older schema", () => {
@@ -272,16 +303,21 @@ describe("settings migration — big week", () => {
 
     expect(result.config.bigWeekEnabled).toBe(false);
     expect(result.config.bigWeekExtraDays).toEqual([6]);
-    expect(result.config.bigWeekAnchor).toBe(defaultBigWeekAnchor);
+    expect(result.config.bigWeekAnchor).toBe("");
     expect(result.recoveryReason).toBe("invalid-values");
   });
 
-  it("canonicalizes the anchor to the Monday of its week without a recovery", () => {
+  it("keeps an aligned phase across a reload", () => {
     const result = recoverVersionedSalaryConfig({
-      config: { ...configWithoutBigWeek, bigWeekAnchor: "2026-05-13" },
+      config: {
+        ...configWithoutBigWeek,
+        bigWeekEnabled: true,
+        bigWeekAnchor: "2026-05-13",
+      },
       schemaVersion: settingsSchemaVersion,
     });
 
+    expect(result.config.bigWeekEnabled).toBe(true);
     expect(result.config.bigWeekAnchor).toBe("2026-05-11");
     expect(result.recoveryReason).toBeUndefined();
   });

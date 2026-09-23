@@ -103,6 +103,9 @@ const zhCN: Messages = {
   // ── Settings → big week ────────────────────────────────────────────────
   "bigWeek.toggle": "大小周模式",
   "bigWeek.extraDays": "大周额外工作日",
+  "bigWeek.thisWeek": "本周是",
+  "bigWeek.bigWeek": "大周",
+  "bigWeek.smallWeek": "小周",
 
   // ── Settings → amount mode ─────────────────────────────────────────────
   "amountMode.rolling": "滚动变换",
@@ -177,6 +180,10 @@ const zhCN: Messages = {
   "validation.lunchSameError": "午休起止时间不能相同",
   "validation.nightLunchOutside": "夜班午休需在工时内",
   "validation.lunchOutside": "午休需在工时内",
+  "validation.bigWeekExtraDaysEmpty": "至少选 1 个大周额外工作日",
+  "validation.bigWeekExtraDaysError": "大周额外工作日必须是一周中的某天",
+  "validation.bigWeekExtraDaysOverlap": "大周额外工作日不能与小周工作日重复",
+  "validation.bigWeekAnchorError": "大周起始周无效，请重新对齐",
 
   // ── Autostart ──────────────────────────────────────────────────────────
   "autostart.error": "自启动设置失败",

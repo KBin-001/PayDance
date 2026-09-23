@@ -56,8 +56,9 @@ describe("settings form helpers", () => {
   it("offers only the days the small week leaves free as big-week extra days", () => {
     const options = createBigWeekExtraDayOptions(t, [1, 2, 3, 4, 5]);
 
-    expect(options.map((option) => option.value)).toEqual([6, 0]);
-    expect(options.map((option) => option.label)).toEqual(["六", "日"]);
+    expect(options.offered.map((option) => option.value)).toEqual([6, 0]);
+    expect(options.offered.map((option) => option.label)).toEqual(["六", "日"]);
+    expect(options.free).toEqual([6, 0]);
   });
 
   it("aligns the big-week anchor to the chosen week", () => {
@@ -76,6 +77,20 @@ describe("settings form helpers", () => {
   it("falls back to the first free day when the chosen extra days are unusable", () => {
     expect(reconcileBigWeekExtraDays([6, 0], [1, 2])).toEqual([6]);
     expect(reconcileBigWeekExtraDays([], [6])).toEqual([]);
+  });
+
+  it("never offers a day the small week already works", () => {
+    const options = createBigWeekExtraDayOptions(t, [1, 2, 3, 4, 5, 6], []);
+
+    expect(options.offered.map((option) => option.value)).toEqual([0]);
+    expect(options.free).toEqual([0]);
+  });
+
+  it("keeps a selected extra day on offer so it can be cleared", () => {
+    const options = createBigWeekExtraDayOptions(t, [1, 2, 3, 4, 5], [1]);
+
+    expect(options.offered.map((option) => option.value)).toEqual([1, 6, 0]);
+    expect(options.free).toEqual([6, 0]);
   });
 
   it("aligns the anchor on a Sunday to the Monday that started that week", () => {

@@ -50,8 +50,9 @@ export type SalaryConfigIssue = {
   message: string;
 };
 
-// A Monday, and only a placeholder phase: turning the toggle on writes the week the user is in.
-export const defaultBigWeekAnchor = "2026-01-05";
+// A config that has never been aligned stores this instead of a date. Switching the toggle on fills
+// it with the week the user is in, so an alignment the user already chose is never overwritten.
+export const unalignedBigWeekAnchor = "";
 
 export const defaultSalaryConfig: SalaryConfig = {
   salaryType: "monthly",
@@ -62,7 +63,7 @@ export const defaultSalaryConfig: SalaryConfig = {
   workdays: [1, 2, 3, 4, 5],
   bigWeekEnabled: false,
   bigWeekExtraDays: [6],
-  bigWeekAnchor: defaultBigWeekAnchor,
+  bigWeekAnchor: unalignedBigWeekAnchor,
   startTime: "09:30",
   endTime: "18:30",
   lunchStart: "12:00",

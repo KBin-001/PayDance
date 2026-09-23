@@ -132,6 +132,7 @@ const updateConfig = <Key extends keyof SalaryConfig>(
       <BigWeekFields
         density="settings"
         :config="config"
+        :has-issue="hasIssue"
         @update:config="emit('update:config', $event)"
       />
     </SettingsGroup>

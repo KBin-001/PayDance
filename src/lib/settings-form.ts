@@ -37,13 +37,32 @@ export function createWeekdayOptions(t: SettingsFormT): WeekdayOption[] {
   ];
 }
 
-// A day the small week already works cannot also be an extra day of the big week: such a
-// combination describes two identical weeks, which is the thing this toggle exists to avoid.
+export type BigWeekExtraDayOptions = {
+  // What the picker renders: the days the small week leaves free, plus a day that is selected but
+  // has since become a small-week workday, so a choice the picker would otherwise hide from sight
+  // can still be cleared.
+  offered: WeekdayOption[];
+  // What the extra days may actually be reconciled to: only the days the small week leaves free. A
+  // day the small week already works would describe two identical weeks, which is the thing this
+  // toggle exists to avoid.
+  free: number[];
+};
+
 export function createBigWeekExtraDayOptions(
   t: SettingsFormT,
   workdays: readonly number[],
-) {
-  return createWeekdayOptions(t).filter((option) => !workdays.includes(option.value));
+  selected: readonly number[] = [],
+): BigWeekExtraDayOptions {
+  const offered = createWeekdayOptions(t).filter(
+    (option) => !workdays.includes(option.value) || selected.includes(option.value),
+  );
+
+  return {
+    offered,
+    free: offered
+      .filter((option) => !workdays.includes(option.value))
+      .map((option) => option.value),
+  };
 }
 
 // The two weeks have to differ, so an extra day the small week already works is dropped; if that

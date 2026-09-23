@@ -3,7 +3,13 @@
 //
 // Additional terms: see /legal/ADDITIONAL_TERMS.md
 
-import type { SalaryConfig, SalaryConfigIssue, SalaryType } from "./config";
+import {
+  unalignedBigWeekAnchor,
+  type SalaryConfig,
+  type SalaryConfigIssue,
+  type SalaryType,
+} from "./config";
+import { parseDateKey } from "./week-cycle";
 import {
   normalizeBreakEnd,
   normalizeTimeInsideWorkWindow,
@@ -19,6 +25,11 @@ export const maxWorkDaysPerMonth = 31;
 const hasPositiveNumber = (value: number) => Number.isFinite(value) && value > 0;
 
 const isValidWorkday = (day: number) => Number.isInteger(day) && day >= 0 && day <= 6;
+
+const isMissingDaySet = (value: unknown) => !Array.isArray(value) || value.length <= 0;
+
+const isDayOfWeekSet = (value: unknown): value is number[] =>
+  Array.isArray(value) && value.every(isValidWorkday);
 
 export function isOvernightWorkConfig(config: SalaryConfig) {
   const start = parseTimeToMinutes(config.startTime);
@@ -69,10 +80,49 @@ export function validateSalaryConfig(
     });
   }
 
-  if (!Array.isArray(config.workdays) || config.workdays.length <= 0) {
+  if (isMissingDaySet(config.workdays)) {
     issues.push({ field: "workdays", message: t("validation.workdaysMinOne") });
-  } else if (!config.workdays.every(isValidWorkday)) {
+  } else if (!isDayOfWeekSet(config.workdays)) {
     issues.push({ field: "workdays", message: t("validation.workdaysError") });
+  }
+
+  // The big-week fields only mean anything while the toggle is on, so a config saved before them,
+  // or one with the toggle off, never turns into "needs setup" because of them.
+  if (config.bigWeekEnabled) {
+    if (isMissingDaySet(config.bigWeekExtraDays)) {
+      issues.push({
+        field: "bigWeekExtraDays",
+        message: t("validation.bigWeekExtraDaysEmpty"),
+      });
+    } else if (!isDayOfWeekSet(config.bigWeekExtraDays)) {
+      issues.push({
+        field: "bigWeekExtraDays",
+        message: t("validation.bigWeekExtraDaysError"),
+      });
+    } else if (
+      Array.isArray(config.workdays) &&
+      config.bigWeekExtraDays.some((day) => config.workdays.includes(day))
+    ) {
+      // The two weeks would be identical, which is the thing the toggle exists to express.
+      issues.push({
+        field: "bigWeekExtraDays",
+        message: t("validation.bigWeekExtraDaysOverlap"),
+      });
+    }
+
+    // The anchor is still unaligned only until the toggle is switched on, which is the one moment
+    // that fills it in. Persisting reads accept that state; here it means the phase is undefined.
+    const anchor = config.bigWeekAnchor;
+    if (
+      typeof anchor !== "string" ||
+      anchor === unalignedBigWeekAnchor ||
+      !parseDateKey(anchor)
+    ) {
+      issues.push({
+        field: "bigWeekAnchor",
+        message: t("validation.bigWeekAnchorError"),
+      });
+    }
   }
 
   if (!Number.isFinite(start)) {

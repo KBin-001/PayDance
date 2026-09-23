@@ -107,6 +107,9 @@ export interface Messages {
   // ── Settings → big week ────────────────────────────────────────────────
   "bigWeek.toggle": string;
   "bigWeek.extraDays": string;
+  "bigWeek.thisWeek": string;
+  "bigWeek.bigWeek": string;
+  "bigWeek.smallWeek": string;
 
   // ── Settings → amount mode ─────────────────────────────────────────────
   "amountMode.rolling": string;
@@ -181,6 +184,10 @@ export interface Messages {
   "validation.lunchSameError": string;
   "validation.nightLunchOutside": string;
   "validation.lunchOutside": string;
+  "validation.bigWeekExtraDaysEmpty": string;
+  "validation.bigWeekExtraDaysError": string;
+  "validation.bigWeekExtraDaysOverlap": string;
+  "validation.bigWeekAnchorError": string;
 
   // ── Autostart ──────────────────────────────────────────────────────────
   "autostart.error": string;

@@ -105,6 +105,9 @@ const en: Messages = {
   // ── Settings → big week ────────────────────────────────────────────────
   "bigWeek.toggle": "Alternating work weeks",
   "bigWeek.extraDays": "Extra workdays in big weeks",
+  "bigWeek.thisWeek": "This week is",
+  "bigWeek.bigWeek": "Big week",
+  "bigWeek.smallWeek": "Small week",
 
   // ── Settings → amount mode ─────────────────────────────────────────────
   "amountMode.rolling": "Rolling",
@@ -180,6 +183,11 @@ const en: Messages = {
   "validation.lunchSameError": "Lunch start and end times cannot be the same",
   "validation.nightLunchOutside": "Night shift lunch break must fall within work hours",
   "validation.lunchOutside": "Lunch break must fall within work hours",
+  "validation.bigWeekExtraDaysEmpty": "Select at least 1 extra workday for big weeks",
+  "validation.bigWeekExtraDaysError": "Big-week extra workdays must be days of the week",
+  "validation.bigWeekExtraDaysOverlap":
+    "Big-week extra workdays cannot repeat a small-week workday",
+  "validation.bigWeekAnchorError": "The big-week start week is invalid; align it again",
 
   // ── Autostart ──────────────────────────────────────────────────────────
   "autostart.error": "Failed to update autostart setting",

@@ -6,6 +6,7 @@
 import {
   defaultSalaryConfig,
   maxWorkDaysPerMonth,
+  unalignedBigWeekAnchor,
   validateSalaryConfig,
   type SalaryConfig,
   type SalaryType,
@@ -13,7 +14,7 @@ import {
 import { parseTimeToMinutes } from "./salary/time";
 import { mondayOfWeek, parseDateKey, toDateKey } from "./salary/week-cycle";
 
-export const settingsSchemaVersion = 4;
+export const settingsSchemaVersion = 5;
 
 type PersistedSalaryConfig = Partial<SalaryConfig> | undefined;
 export type VersionedSalaryConfigInput = {
@@ -50,7 +51,8 @@ const isBigWeekExtraDays = (value: unknown): value is number[] =>
   Array.isArray(value) && value.length > 0 && value.every(isWorkday);
 
 const isBigWeekAnchor = (value: unknown): value is string =>
-  typeof value === "string" && parseDateKey(value) !== null;
+  typeof value === "string" &&
+  (value === unalignedBigWeekAnchor || parseDateKey(value) !== null);
 
 const normalizeWorkdays = (workdays: unknown) => {
   if (!Array.isArray(workdays)) return [...defaultWorkdays];
@@ -70,11 +72,13 @@ const normalizeBigWeekExtraDays = (extraDays: unknown) => {
 };
 
 // Only the week an anchor falls in decides the phase, so any day of that week is stored as its
-// Monday. That keeps a hand-edited anchor from shifting the whole alternation by a week.
+// Monday. That keeps a hand-edited anchor from shifting the whole alternation by a week. An anchor
+// that cannot be read at all becomes the "never aligned" state instead of an arbitrary phase, and
+// validation points at it the moment the toggle is on.
 const normalizeBigWeekAnchor = (anchor: unknown) => {
   const parsed = typeof anchor === "string" ? parseDateKey(anchor) : null;
 
-  return parsed ? toDateKey(mondayOfWeek(parsed)) : defaultSalaryConfig.bigWeekAnchor;
+  return parsed ? toDateKey(mondayOfWeek(parsed)) : unalignedBigWeekAnchor;
 };
 
 const asPartialConfig = (value: unknown): PersistedSalaryConfig =>
@@ -89,10 +93,21 @@ const migrateV1ToV2 = (value: unknown) => asPartialConfig(value);
 const migrateV2ToV3 = (value: unknown) => asPartialConfig(value);
 const migrateV3ToV4 = (value: unknown) => asPartialConfig(value);
 
+// The anchor changed meaning in v5. A v4 config stored either a fixed placeholder or the week the
+// toggle happened to be switched on in, and neither is a phase the user picked, so v5 starts such a
+// config unaligned: the phase is written the next time the toggle is switched on.
+const migrateV4ToV5 = (value: unknown) => {
+  const config = asPartialConfig(value);
+  if (!config) return config;
+
+  return { ...config, bigWeekAnchor: unalignedBigWeekAnchor };
+};
+
 export const settingsMigrations: Record<number, (value: unknown) => unknown> = {
   1: migrateV1ToV2,
   2: migrateV2ToV3,
   3: migrateV3ToV4,
+  4: migrateV4ToV5,
 };
 
 function normalizeSalaryConfig(
@@ -180,6 +195,14 @@ function normalizeSalaryConfig(
     config.lunchStart = defaultSalaryConfig.lunchStart;
     config.lunchEnd = defaultSalaryConfig.lunchEnd;
     config.enableLunchBreak = defaultSalaryConfig.enableLunchBreak;
+    recovered = true;
+  }
+
+  // Mirrors the lunch-window repair: the toggle cannot stay on without a phase to alternate from,
+  // and a migration has no clock to align with. Switching it off leaves a config that validates
+  // again, and switching it back on writes the week the user is in.
+  if (config.bigWeekEnabled && !parseDateKey(config.bigWeekAnchor)) {
+    config.bigWeekEnabled = false;
     recovered = true;
   }
 
