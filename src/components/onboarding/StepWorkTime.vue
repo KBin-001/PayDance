@@ -4,6 +4,7 @@
 //
 // Additional terms: see /legal/ADDITIONAL_TERMS.md
 import type { SalaryConfig, SalaryConfigIssue } from "../../lib/salary";
+import BigWeekFields from "../settings/BigWeekFields.vue";
 import LunchBreakFields from "../settings/LunchBreakFields.vue";
 import WorkdayPicker from "../settings/WorkdayPicker.vue";
 import WorkTimeFields from "../settings/WorkTimeFields.vue";
@@ -32,6 +33,13 @@ const updateConfig = <Key extends keyof SalaryConfig>(
       :invalid="hasIssue('workdays')"
       :workdays="config.workdays"
       @update:workdays="updateConfig('workdays', $event)"
+    />
+
+    <BigWeekFields
+      density="onboarding"
+      :config="config"
+      :has-issue="hasIssue"
+      @update:config="emit('update:config', $event)"
     />
 
     <WorkTimeFields
