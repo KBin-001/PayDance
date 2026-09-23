@@ -104,6 +104,10 @@ export interface Messages {
   "workdays.sat": string;
   "workdays.sun": string;
 
+  // ── Settings → big week ────────────────────────────────────────────────
+  "bigWeek.toggle": string;
+  "bigWeek.extraDays": string;
+
   // ── Settings → amount mode ─────────────────────────────────────────────
   "amountMode.rolling": string;
   "amountMode.plain": string;

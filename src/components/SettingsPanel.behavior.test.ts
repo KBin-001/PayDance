@@ -103,3 +103,100 @@ describe("SettingsPanel behavior", () => {
     expect(titleRow?.querySelector("strong")?.textContent).toContain("首次启动向导");
   });
 });
+
+const findBigWeekToggle = (wrapper: ReturnType<typeof mountSettingsPanel>) =>
+  wrapper
+    .findAll('input[type="checkbox"]')
+    .find((input) => input.element.parentElement?.textContent?.includes("大小周模式"));
+
+describe("SettingsPanel big week", () => {
+  it("reveals the extra-day picker only while the toggle is on", async () => {
+    const wrapper = mountSettingsPanel();
+
+    expect(wrapper.findAll(".weekday-control")).toHaveLength(1);
+
+    await wrapper.setProps({
+      config: {
+        ...defaultSalaryConfig,
+        workdays: [...defaultSalaryConfig.workdays],
+        bigWeekEnabled: true,
+      },
+    });
+
+    const pickers = wrapper.findAll(".weekday-control");
+    expect(pickers).toHaveLength(2);
+    expect(pickers[1].attributes("aria-label")).toBe("大周额外工作日");
+    expect(pickers[1].findAll("button").map((button) => button.text())).toEqual([
+      "六",
+      "日",
+    ]);
+  });
+
+  it("aligns the big-week anchor to the current week when the toggle is switched on", async () => {
+    // 2026-05-13 is a Wednesday, so the week the user is in started on 2026-05-11.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-13T09:00:00"));
+    try {
+      const wrapper = mountSettingsPanel();
+
+      await findBigWeekToggle(wrapper)?.setValue(true);
+
+      expect(wrapper.emitted("update:config")?.[0]?.[0]).toMatchObject({
+        bigWeekEnabled: true,
+        bigWeekAnchor: "2026-05-11",
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("turns the toggle on into two weeks that differ", async () => {
+    // This small week already works Saturday, so the default Saturday extra day would describe the
+    // same week twice and cannot be kept.
+    const wrapper = mountSettingsPanel({
+      ...defaultSalaryConfig,
+      workdays: [1, 2, 3, 4, 5, 6],
+    });
+
+    await findBigWeekToggle(wrapper)?.setValue(true);
+
+    expect(wrapper.emitted("update:config")?.[0]?.[0]).toMatchObject({
+      bigWeekEnabled: true,
+      bigWeekExtraDays: [0],
+    });
+  });
+
+  it("switches off without disturbing the anchor", async () => {
+    const wrapper = mountSettingsPanel({
+      ...defaultSalaryConfig,
+      workdays: [...defaultSalaryConfig.workdays],
+      bigWeekEnabled: true,
+      bigWeekAnchor: "2026-05-11",
+    });
+
+    await findBigWeekToggle(wrapper)?.setValue(false);
+
+    expect(wrapper.emitted("update:config")?.[0]?.[0]).toMatchObject({
+      bigWeekEnabled: false,
+      bigWeekAnchor: "2026-05-11",
+    });
+  });
+
+  it("emits shared extra-day updates from the big-week picker", async () => {
+    const wrapper = mountSettingsPanel({
+      ...defaultSalaryConfig,
+      workdays: [...defaultSalaryConfig.workdays],
+      bigWeekEnabled: true,
+    });
+    const sundayButton = wrapper
+      .findAll(".weekday-control")[1]
+      .findAll("button")
+      .find((button) => button.text() === "日");
+
+    await sundayButton?.trigger("click");
+
+    expect(wrapper.emitted("update:config")?.[0]?.[0]).toMatchObject({
+      bigWeekExtraDays: [0, 6],
+    });
+  });
+});

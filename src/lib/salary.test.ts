@@ -564,3 +564,125 @@ describe("validateSalaryConfig bounds", () => {
     expect(issues).toEqual([{ field: "workTime", message: "午休起止时间不能相同" }]);
   });
 });
+
+describe("big week (大小周)", () => {
+  // 2026-05-11 is a Monday; 2026-05-16 is the Saturday of that same week.
+  const bigWeekConfig: SalaryConfig = {
+    ...config,
+    bigWeekEnabled: true,
+    bigWeekExtraDays: [6],
+    bigWeekAnchor: "2026-05-11",
+  };
+
+  it("works the extra day of a big week", () => {
+    const snapshot = calculateSalarySnapshot(
+      new Date("2026-05-16T10:00:00"),
+      bigWeekConfig,
+    );
+
+    expect(snapshot.status).toBe("working");
+  });
+
+  it("rests on the same weekday of a small week", () => {
+    const snapshot = calculateSalarySnapshot(
+      new Date("2026-05-23T10:00:00"),
+      bigWeekConfig,
+    );
+
+    expect(snapshot.status).toBe("rest-day");
+    expect(snapshot.earnedToday).toBe(0);
+  });
+
+  it("accrues pay across the extra day of a big week", () => {
+    const morning = calculateSalarySnapshot(
+      new Date("2026-05-16T10:00:00"),
+      bigWeekConfig,
+    );
+    const evening = calculateSalarySnapshot(
+      new Date("2026-05-16T17:00:00"),
+      bigWeekConfig,
+    );
+
+    expect(evening.earnedToday).toBeGreaterThan(morning.earnedToday);
+  });
+
+  it("keeps the shared weekdays working in both weeks", () => {
+    // 2026-05-13 and 2026-05-20 are the Wednesdays of the big and the small week.
+    expect(
+      calculateSalarySnapshot(new Date("2026-05-13T10:00:00"), bigWeekConfig).status,
+    ).toBe("working");
+    expect(
+      calculateSalarySnapshot(new Date("2026-05-20T10:00:00"), bigWeekConfig).status,
+    ).toBe("working");
+  });
+
+  it("alternates in the weeks before the anchor", () => {
+    // One week before the anchor week is small, two weeks before is big again.
+    expect(
+      calculateSalarySnapshot(new Date("2026-05-09T10:00:00"), bigWeekConfig).status,
+    ).toBe("rest-day");
+    expect(
+      calculateSalarySnapshot(new Date("2026-05-02T10:00:00"), bigWeekConfig).status,
+    ).toBe("working");
+  });
+
+  it("reads any day of the anchor week as the same phase", () => {
+    const wednesdayAnchor: SalaryConfig = {
+      ...bigWeekConfig,
+      bigWeekAnchor: "2026-05-13",
+    };
+
+    expect(
+      calculateSalarySnapshot(new Date("2026-05-16T10:00:00"), wednesdayAnchor, vt)
+        .status,
+    ).toBe("working");
+    expect(
+      calculateSalarySnapshot(new Date("2026-05-23T10:00:00"), wednesdayAnchor, vt)
+        .status,
+    ).toBe("rest-day");
+  });
+
+  it("alternates across a month boundary", () => {
+    expect(
+      calculateSalarySnapshot(new Date("2026-05-30T10:00:00"), bigWeekConfig).status,
+    ).toBe("working");
+    expect(
+      calculateSalarySnapshot(new Date("2026-06-06T10:00:00"), bigWeekConfig).status,
+    ).toBe("rest-day");
+  });
+
+  it("alternates across a year boundary", () => {
+    const yearEndConfig: SalaryConfig = {
+      ...bigWeekConfig,
+      bigWeekAnchor: "2026-12-28",
+    };
+
+    expect(
+      calculateSalarySnapshot(new Date("2027-01-02T10:00:00"), yearEndConfig).status,
+    ).toBe("working");
+    expect(
+      calculateSalarySnapshot(new Date("2027-01-09T10:00:00"), yearEndConfig).status,
+    ).toBe("rest-day");
+  });
+
+  it("ignores the extra days while the toggle is off", () => {
+    const disabled: SalaryConfig = { ...bigWeekConfig, bigWeekEnabled: false };
+    const saturday = new Date("2026-05-16T10:00:00");
+    const wednesday = new Date("2026-05-13T10:00:00");
+
+    expect(calculateSalarySnapshot(saturday, disabled)).toEqual(
+      calculateSalarySnapshot(saturday, config),
+    );
+    expect(calculateSalarySnapshot(wednesday, disabled)).toEqual(
+      calculateSalarySnapshot(wednesday, config),
+    );
+  });
+
+  it("falls back to a small week when the anchor is not a date", () => {
+    const broken: SalaryConfig = { ...bigWeekConfig, bigWeekAnchor: "2026-02-31" };
+
+    expect(calculateSalarySnapshot(new Date("2026-05-16T10:00:00"), broken).status).toBe(
+      "rest-day",
+    );
+  });
+});

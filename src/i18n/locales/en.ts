@@ -102,6 +102,10 @@ const en: Messages = {
   "workdays.sat": "Sat",
   "workdays.sun": "Sun",
 
+  // ── Settings → big week ────────────────────────────────────────────────
+  "bigWeek.toggle": "Alternating work weeks",
+  "bigWeek.extraDays": "Extra workdays in big weeks",
+
   // ── Settings → amount mode ─────────────────────────────────────────────
   "amountMode.rolling": "Rolling",
   "amountMode.plain": "Instant",

@@ -11,6 +11,7 @@ import {
   type SalaryType,
 } from "./salary";
 import { parseTimeToMinutes } from "./salary/time";
+import { mondayOfWeek, parseDateKey, toDateKey } from "./salary/week-cycle";
 
 export const settingsSchemaVersion = 4;
 
@@ -45,6 +46,12 @@ const isValidTime = (value: unknown): value is string =>
 const isWorkday = (value: unknown): value is number =>
   Number.isInteger(value) && Number(value) >= 0 && Number(value) <= 6;
 
+const isBigWeekExtraDays = (value: unknown): value is number[] =>
+  Array.isArray(value) && value.length > 0 && value.every(isWorkday);
+
+const isBigWeekAnchor = (value: unknown): value is string =>
+  typeof value === "string" && parseDateKey(value) !== null;
+
 const normalizeWorkdays = (workdays: unknown) => {
   if (!Array.isArray(workdays)) return [...defaultWorkdays];
 
@@ -54,6 +61,20 @@ const normalizeWorkdays = (workdays: unknown) => {
   }
 
   return uniqueWorkdays.sort((a, b) => a - b);
+};
+
+const normalizeBigWeekExtraDays = (extraDays: unknown) => {
+  if (!isBigWeekExtraDays(extraDays)) return [...defaultSalaryConfig.bigWeekExtraDays];
+
+  return [...new Set(extraDays)].sort((a, b) => a - b);
+};
+
+// Only the week an anchor falls in decides the phase, so any day of that week is stored as its
+// Monday. That keeps a hand-edited anchor from shifting the whole alternation by a week.
+const normalizeBigWeekAnchor = (anchor: unknown) => {
+  const parsed = typeof anchor === "string" ? parseDateKey(anchor) : null;
+
+  return parsed ? toDateKey(mondayOfWeek(parsed)) : defaultSalaryConfig.bigWeekAnchor;
 };
 
 const asPartialConfig = (value: unknown): PersistedSalaryConfig =>
@@ -97,6 +118,11 @@ function normalizeSalaryConfig(
       ? savedConfig.workDaysPerMonth
       : defaultSalaryConfig.workDaysPerMonth,
     workdays: normalizeWorkdays(savedConfig?.workdays),
+    bigWeekEnabled: isBoolean(savedConfig?.bigWeekEnabled)
+      ? savedConfig.bigWeekEnabled
+      : defaultSalaryConfig.bigWeekEnabled,
+    bigWeekExtraDays: normalizeBigWeekExtraDays(savedConfig?.bigWeekExtraDays),
+    bigWeekAnchor: normalizeBigWeekAnchor(savedConfig?.bigWeekAnchor),
     startTime: isValidTime(savedConfig?.startTime)
       ? savedConfig.startTime
       : defaultSalaryConfig.startTime,
@@ -124,6 +150,9 @@ function normalizeSalaryConfig(
       "workdays",
       (value) => Array.isArray(value) && value.length > 0 && value.every(isWorkday),
     ],
+    ["bigWeekEnabled", isBoolean],
+    ["bigWeekExtraDays", isBigWeekExtraDays],
+    ["bigWeekAnchor", isBigWeekAnchor],
     ["startTime", isValidTime],
     ["endTime", isValidTime],
     ["lunchStart", isValidTime],

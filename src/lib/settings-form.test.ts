@@ -5,6 +5,9 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  alignBigWeekAnchor,
+  createBigWeekExtraDayOptions,
+  reconcileBigWeekExtraDays,
   createGetSalaryAmountLabel,
   createSalaryTypeOptions,
   createWeekdayOptions,
@@ -48,5 +51,37 @@ describe("settings form helpers", () => {
     ]);
     expect(toggleWorkdayValue([1, 3, 5], 2)).toEqual([1, 2, 3, 5]);
     expect(toggleWorkdayValue([1, 2, 3, 5], 2)).toEqual([1, 3, 5]);
+  });
+
+  it("offers only the days the small week leaves free as big-week extra days", () => {
+    const options = createBigWeekExtraDayOptions(t, [1, 2, 3, 4, 5]);
+
+    expect(options.map((option) => option.value)).toEqual([6, 0]);
+    expect(options.map((option) => option.label)).toEqual(["六", "日"]);
+  });
+
+  it("aligns the big-week anchor to the chosen week", () => {
+    // 2026-05-13 is a Wednesday, so the week it belongs to started on 2026-05-11.
+    const wednesday = new Date("2026-05-13T09:00:00");
+
+    expect(alignBigWeekAnchor(wednesday, true)).toBe("2026-05-11");
+    expect(alignBigWeekAnchor(wednesday, false)).toBe("2026-05-18");
+  });
+
+  it("keeps the extra days that the small week still leaves free", () => {
+    expect(reconcileBigWeekExtraDays([6, 0], [6])).toEqual([6]);
+    expect(reconcileBigWeekExtraDays([0], [6])).toEqual([0]);
+  });
+
+  it("falls back to the first free day when the chosen extra days are unusable", () => {
+    expect(reconcileBigWeekExtraDays([6, 0], [1, 2])).toEqual([6]);
+    expect(reconcileBigWeekExtraDays([], [6])).toEqual([]);
+  });
+
+  it("aligns the anchor on a Sunday to the Monday that started that week", () => {
+    const sunday = new Date("2026-05-17T09:00:00");
+
+    expect(alignBigWeekAnchor(sunday, true)).toBe("2026-05-11");
+    expect(alignBigWeekAnchor(sunday, false)).toBe("2026-05-18");
   });
 });

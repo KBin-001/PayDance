@@ -4,7 +4,7 @@
 // Additional terms: see /legal/ADDITIONAL_TERMS.md
 
 import { describe, expect, it } from "vitest";
-import { defaultSalaryConfig } from "./salary";
+import { defaultBigWeekAnchor, defaultSalaryConfig } from "./salary";
 import {
   migrateSalaryConfig,
   migrateVersionedSalaryConfig,
@@ -218,5 +218,81 @@ describe("settings migration", () => {
 
     expect(result.recoveryReason).toBe("invalid-values");
     expect(result.config.workDaysPerMonth).toBe(defaultSalaryConfig.workDaysPerMonth);
+  });
+});
+
+describe("settings migration — big week", () => {
+  // A config written before the big-week fields existed: valid, and missing all three of them.
+  const configWithoutBigWeek = {
+    salaryType: "monthly",
+    monthlySalary: 18000,
+    dailySalary: 360,
+    hourlyRate: 45,
+    workDaysPerMonth: 22,
+    workdays: [1, 2, 3, 4, 5],
+    startTime: "09:30",
+    endTime: "18:30",
+    lunchStart: "12:00",
+    lunchEnd: "13:30",
+    enableLunchBreak: false,
+  };
+
+  it("fills the big-week fields without reporting a recovery", () => {
+    const result = recoverVersionedSalaryConfig({
+      config: configWithoutBigWeek,
+      schemaVersion: settingsSchemaVersion,
+    });
+
+    expect(result.config.bigWeekEnabled).toBe(false);
+    expect(result.config.bigWeekExtraDays).toEqual([6]);
+    expect(result.config.bigWeekAnchor).toBe(defaultBigWeekAnchor);
+    expect(result.recoveryReason).toBeUndefined();
+  });
+
+  it("keeps the toggle off when upgrading an older schema", () => {
+    const result = recoverVersionedSalaryConfig({
+      config: configWithoutBigWeek,
+      schemaVersion: 3,
+    });
+
+    expect(result.config.bigWeekEnabled).toBe(false);
+    expect(result.recoveryReason).toBeUndefined();
+  });
+
+  it("falls back to safe big-week values when they are invalid", () => {
+    const result = recoverVersionedSalaryConfig({
+      config: {
+        ...configWithoutBigWeek,
+        bigWeekEnabled: "yes",
+        bigWeekExtraDays: [9],
+        bigWeekAnchor: "not-a-date",
+      },
+      schemaVersion: settingsSchemaVersion,
+    });
+
+    expect(result.config.bigWeekEnabled).toBe(false);
+    expect(result.config.bigWeekExtraDays).toEqual([6]);
+    expect(result.config.bigWeekAnchor).toBe(defaultBigWeekAnchor);
+    expect(result.recoveryReason).toBe("invalid-values");
+  });
+
+  it("canonicalizes the anchor to the Monday of its week without a recovery", () => {
+    const result = recoverVersionedSalaryConfig({
+      config: { ...configWithoutBigWeek, bigWeekAnchor: "2026-05-13" },
+      schemaVersion: settingsSchemaVersion,
+    });
+
+    expect(result.config.bigWeekAnchor).toBe("2026-05-11");
+    expect(result.recoveryReason).toBeUndefined();
+  });
+
+  it("sorts and de-duplicates the extra days", () => {
+    const result = recoverVersionedSalaryConfig({
+      config: { ...configWithoutBigWeek, bigWeekExtraDays: [0, 6, 6] },
+      schemaVersion: settingsSchemaVersion,
+    });
+
+    expect(result.config.bigWeekExtraDays).toEqual([0, 6]);
+    expect(result.recoveryReason).toBeUndefined();
   });
 });

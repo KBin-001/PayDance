@@ -13,6 +13,7 @@ import {
 } from "../composables/useI18n";
 import type { UpdaterStatus } from "#updater";
 import type { Messages } from "../i18n/types";
+import BigWeekFields from "./settings/BigWeekFields.vue";
 import CurrencySymbolField from "./settings/CurrencySymbolField.vue";
 import LunchBreakFields from "./settings/LunchBreakFields.vue";
 import SalaryAmountFields from "./settings/SalaryAmountFields.vue";
@@ -127,6 +128,11 @@ const updateConfig = <Key extends keyof SalaryConfig>(
         :invalid="hasIssue('workdays')"
         :workdays="config.workdays"
         @update:workdays="updateConfig('workdays', $event)"
+      />
+      <BigWeekFields
+        density="settings"
+        :config="config"
+        @update:config="emit('update:config', $event)"
       />
     </SettingsGroup>
 

@@ -20,6 +20,9 @@ export type SalaryConfig = {
   hourlyRate: number;
   workDaysPerMonth: number;
   workdays: number[];
+  bigWeekEnabled: boolean;
+  bigWeekExtraDays: number[];
+  bigWeekAnchor: string;
   startTime: string;
   endTime: string;
   lunchStart: string;
@@ -47,6 +50,9 @@ export type SalaryConfigIssue = {
   message: string;
 };
 
+// A Monday, and only a placeholder phase: turning the toggle on writes the week the user is in.
+export const defaultBigWeekAnchor = "2026-01-05";
+
 export const defaultSalaryConfig: SalaryConfig = {
   salaryType: "monthly",
   monthlySalary: 10000,
@@ -54,6 +60,9 @@ export const defaultSalaryConfig: SalaryConfig = {
   hourlyRate: 45,
   workDaysPerMonth: 22,
   workdays: [1, 2, 3, 4, 5],
+  bigWeekEnabled: false,
+  bigWeekExtraDays: [6],
+  bigWeekAnchor: defaultBigWeekAnchor,
   startTime: "09:30",
   endTime: "18:30",
   lunchStart: "12:00",

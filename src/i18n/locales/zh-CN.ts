@@ -100,6 +100,10 @@ const zhCN: Messages = {
   "workdays.sat": "六",
   "workdays.sun": "日",
 
+  // ── Settings → big week ────────────────────────────────────────────────
+  "bigWeek.toggle": "大小周模式",
+  "bigWeek.extraDays": "大周额外工作日",
+
   // ── Settings → amount mode ─────────────────────────────────────────────
   "amountMode.rolling": "滚动变换",
   "amountMode.plain": "直接变换",
