@@ -36,16 +36,20 @@ const rateLineText = (wrapper: ReturnType<typeof mountDashboard>) =>
 
 describe("live hourly rate on the main dashboard", () => {
   it("reads the rate under today's earnings with the currency symbol and an hourly unit", () => {
-    expect(rateLineText(mountDashboard("¥", "37.50"))).toMatch(
-      /当前时薪\s*¥37\.50\s*\/h/,
-    );
+    const wrapper = mountDashboard("¥", "37.50");
+
+    expect(rateLineText(wrapper)).toMatch(/当前时薪\s*¥37\.50\s*\/h/);
+    expect(wrapper.get(".hero-rate__divider").attributes("aria-hidden")).toBe("true");
+    expect(wrapper.get(".hero-rate__symbol").text()).toBe("¥");
   });
 
   it("drops the symbol when the user hid it", () => {
-    const text = rateLineText(mountDashboard("", "37.50"));
+    const wrapper = mountDashboard("", "37.50");
+    const text = rateLineText(wrapper);
 
     expect(text).toContain("37.50");
     expect(text).not.toContain("¥");
+    expect(wrapper.find(".hero-rate__symbol").exists()).toBe(false);
   });
 
   it("shows no line at all while the config needs fixing", () => {

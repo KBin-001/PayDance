@@ -2,7 +2,7 @@
 name = "pay-dance"
 version = "0.9.10"
 description = "薪跳 · 桌面实时工资看板"
-authors = ["Mr.Baoboer"]
+authors = ["kbin"]
 license = "AGPL-3.0-only"
 repository = "https://github.com/MrBaoboer/PayDance"
 edition = "2024"

@@ -23,13 +23,13 @@ describe("app metadata", () => {
     expect(appTagline).toBe("桌面实时工资看板");
   });
 
-  it("records the project repository", () => {
-    expect(repositoryUrl).toBe("https://github.com/MrBaoboer/PayDance");
+  it("links the GitHub entry point to the selected profile", () => {
+    expect(repositoryUrl).toBe("https://github.com/KBin-001");
   });
 
   it("records the product author attribution", () => {
-    expect(appAuthor).toBe("Mr.Baoboer");
-    expect(appCopyright).toBe("© 2026 Mr.Baoboer");
+    expect(appAuthor).toBe("kbin");
+    expect(appCopyright).toBe("© 2026 kbin");
   });
 
   it("exposes the current app version for about surfaces", () => {

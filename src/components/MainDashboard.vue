@@ -41,13 +41,6 @@ const amountAriaLabel = computed(() =>
     amount: withCurrencySymbol(currencySymbol.value, props.earnedText),
   }),
 );
-
-// Today's earnings divided by the hours actually spent, so the caption carries the currency and
-// the hourly unit the dashboard model deliberately leaves out.
-const rateValueText = computed(
-  () =>
-    `${withCurrencySymbol(currencySymbol.value, props.effectiveHourlyRateText)}${t.value("dashboard.perHourUnit")}`,
-);
 </script>
 
 <template>
@@ -74,7 +67,12 @@ const rateValueText = computed(
 
     <p v-if="effectiveHourlyRateText" class="hero-rate">
       <span class="hero-rate__label">{{ t("dashboard.effectiveHourlyRate") }}</span>
-      <strong class="hero-rate__value" v-text="rateValueText" />
+      <span class="hero-rate__divider" aria-hidden="true" />
+      <strong class="hero-rate__value">
+        <span v-if="currencySymbol" class="hero-rate__symbol">{{ currencySymbol }}</span>
+        <span>{{ effectiveHourlyRateText }}</span>
+        <span class="hero-rate__unit">{{ t("dashboard.perHourUnit") }}</span>
+      </strong>
     </p>
 
     <div class="hero-controls">
@@ -143,12 +141,22 @@ const rateValueText = computed(
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: 0.4em;
-  margin-top: clamp(1px, 0.6cqh, 5px);
+  gap: 0.55em;
+  margin-top: clamp(2px, 0.8cqh, 6px);
   color: var(--muted);
-  font-size: var(--ui-font-xs, 13px);
-  font-weight: 640;
+  font-size: clamp(14px, 3.2cqw, 18px);
+  font-weight: 650;
   line-height: 1.15;
+}
+
+.hero-rate__label {
+  font-size: 0.82em;
+}
+
+.hero-rate__divider {
+  align-self: stretch;
+  width: 1px;
+  background: var(--income-accent);
 }
 
 /* The caption pays for itself out of the gap the dashboard already had: at the default window size
@@ -168,10 +176,17 @@ const rateValueText = computed(
 }
 
 .hero-rate__value {
+  display: inline-flex;
+  align-items: baseline;
   color: var(--text);
   font-family: var(--font-dashboard);
-  font-weight: 720;
+  font-weight: 750;
   font-variant-numeric: tabular-nums;
+}
+
+.hero-rate__symbol,
+.hero-rate__unit {
+  color: var(--income-accent);
 }
 
 .hero-controls {

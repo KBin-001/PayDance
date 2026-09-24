@@ -18,6 +18,9 @@ export type SalaryConfig = {
   monthlySalary: number;
   dailySalary: number;
   hourlyRate: number;
+  overtimeEnabled: boolean;
+  overtimeHours: number;
+  overtimePay: number;
   workDaysPerMonth: number;
   workdays: number[];
   bigWeekEnabled: boolean;
@@ -60,6 +63,9 @@ export const defaultSalaryConfig: SalaryConfig = {
   monthlySalary: 10000,
   dailySalary: 360,
   hourlyRate: 45,
+  overtimeEnabled: false,
+  overtimeHours: 0,
+  overtimePay: 0,
   workDaysPerMonth: 22,
   workdays: [1, 2, 3, 4, 5],
   bigWeekEnabled: false,

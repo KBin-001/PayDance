@@ -68,6 +68,21 @@ export function validateSalaryConfig(
     issues.push({ field: "hourlyRate", message: t("validation.hourlyPositive") });
   }
 
+  if (config.overtimeEnabled) {
+    if (!Number.isFinite(config.overtimeHours) || config.overtimeHours < 0) {
+      issues.push({ field: "overtimeHours", message: t("validation.overtimeHours") });
+    }
+    if (!Number.isFinite(config.overtimePay) || config.overtimePay < 0) {
+      issues.push({ field: "overtimePay", message: t("validation.overtimePay") });
+    }
+    if (config.overtimePay > 0 && config.overtimeHours === 0) {
+      issues.push({
+        field: "overtimeHours",
+        message: t("validation.overtimeHoursForPay"),
+      });
+    }
+  }
+
   if (salaryType === "monthly" && !hasPositiveNumber(config.workDaysPerMonth)) {
     issues.push({
       field: "workDaysPerMonth",

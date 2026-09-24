@@ -16,6 +16,15 @@ const buildModel = (snapshot: Ref<SalarySnapshot>, config = defaultSalaryConfig)
   useDashboardModel(ref(config), snapshot, createT("zh-CN"), ref("zh-CN"));
 
 describe("useDashboardModel effective hourly rate", () => {
+  it("includes enabled overtime pay in today's expected earnings", () => {
+    const model = buildModel(snapshotOf({ dailySalary: 375, status: "working" }), {
+      ...defaultSalaryConfig,
+      overtimeEnabled: true,
+      overtimeHours: 2,
+      overtimePay: 100,
+    });
+    expect(model.dailyEarnText.value).toBe("475.00");
+  });
   it("formats the live hourly rate to two decimals", () => {
     const model = buildModel(
       snapshotOf({ effectiveHourlyRate: 46.875, hourlyRate: 46.875, status: "working" }),

@@ -14,6 +14,24 @@ import {
 } from "./settings-migration";
 
 describe("settings migration", () => {
+  it("starts older settings with overtime off and preserves valid overtime values", () => {
+    const old = migrateSalaryConfig({ monthlySalary: 12000 }, 5);
+    expect(old).toMatchObject({
+      overtimeEnabled: false,
+      overtimeHours: 0,
+      overtimePay: 0,
+    });
+
+    const saved = migrateSalaryConfig(
+      { overtimeEnabled: true, overtimeHours: 1.5, overtimePay: 90 },
+      settingsSchemaVersion,
+    );
+    expect(saved).toMatchObject({
+      overtimeEnabled: true,
+      overtimeHours: 1.5,
+      overtimePay: 90,
+    });
+  });
   it("migrates v2 salary config into the v0.5 salary model", () => {
     const config = migrateSalaryConfig({
       monthlySalary: 18000,
@@ -75,8 +93,8 @@ describe("settings migration", () => {
     expect(resolveOnboardingState(undefined, true)).toBe(true);
   });
 
-  it("declares the v0.5 settings schema version", () => {
-    expect(settingsSchemaVersion).toBe(5);
+  it("declares the current settings schema version", () => {
+    expect(settingsSchemaVersion).toBe(6);
   });
 
   it("migrates saved configs through an explicit versioned chain", () => {

@@ -137,14 +137,13 @@ describe("desktop window chrome", () => {
     );
   });
 
-  it("allows the renamed GitHub repository to open from the desktop app", () => {
+  it("allows the selected GitHub profile to open from the desktop app", () => {
     const openUrlPermission = defaultCapability.permissions.find(
       (permission) => permission.identifier === "opener:allow-open-url",
     );
 
-    expect(openUrlPermission.allow).toEqual([
-      { url: "https://github.com/MrBaoboer/PayDance" },
-    ]);
+    expect(openUrlPermission.allow).toEqual([{ url: "https://github.com/KBin-001" }]);
+    expect(tauriConfig.bundle.homepage).toBe("https://github.com/KBin-001");
   });
 
   it("allows the frontend to exit immediately after flushing tray quit state", () => {

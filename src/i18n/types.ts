@@ -55,6 +55,7 @@ export interface Messages {
   "settings.salary": string;
   "settings.workdays": string;
   "settings.workTime": string;
+  "settings.overtime": string;
   "settings.amountAnimation": string;
   "settings.amountAnimationDesc": string;
   "settings.currency": string;
@@ -95,6 +96,12 @@ export interface Messages {
   "lunchBreak.toggleOnboarding": string;
   "lunchBreak.start": string;
   "lunchBreak.end": string;
+
+  // ── Settings → overtime ────────────────────────────────────────────────
+  "overtime.toggle": string;
+  "overtime.hours": string;
+  "overtime.pay": string;
+  "overtime.unitHours": string;
 
   // ── Settings → workdays ────────────────────────────────────────────────
   "workdays.label": string;
@@ -178,6 +185,9 @@ export interface Messages {
   "validation.monthlyPositive": string;
   "validation.dailyPositive": string;
   "validation.hourlyPositive": string;
+  "validation.overtimeHours": string;
+  "validation.overtimePay": string;
+  "validation.overtimeHoursForPay": string;
   "validation.workDaysPositive": string;
   "validation.workDaysRange": string;
   "validation.workdaysMinOne": string;

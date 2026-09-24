@@ -29,7 +29,15 @@ export function useDashboardModel(
 ) {
   const earnedText = computed(() => formatYuan(snapshot.value.earnedToday, locale.value));
   const dailyEarnText = computed(() =>
-    formatYuan(snapshot.value.dailySalary, locale.value),
+    formatYuan(
+      snapshot.value.dailySalary +
+        (config.value.overtimeEnabled &&
+        snapshot.value.status !== "rest-day" &&
+        snapshot.value.status !== "invalid-config"
+          ? config.value.overtimePay
+          : 0),
+      locale.value,
+    ),
   );
   const salaryModeLabel = computed(() => {
     if (config.value.salaryType === "daily") return t("salaryMode.dailyLong");

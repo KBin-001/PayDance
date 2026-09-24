@@ -16,6 +16,7 @@ import type { Messages } from "../i18n/types";
 import BigWeekFields from "./settings/BigWeekFields.vue";
 import CurrencySymbolField from "./settings/CurrencySymbolField.vue";
 import LunchBreakFields from "./settings/LunchBreakFields.vue";
+import OvertimeFields from "./settings/OvertimeFields.vue";
 import SalaryAmountFields from "./settings/SalaryAmountFields.vue";
 import SalaryModeControl from "./settings/SalaryModeControl.vue";
 import SettingsAboutFooter from "./settings/SettingsAboutFooter.vue";
@@ -150,6 +151,14 @@ const updateConfig = <Key extends keyof SalaryConfig>(
       <LunchBreakFields
         density="settings"
         variant="settings"
+        :config="config"
+        :has-issue="hasIssue"
+        @update:config="emit('update:config', $event)"
+      />
+    </SettingsGroup>
+
+    <SettingsGroup :title="t('settings.overtime')">
+      <OvertimeFields
         :config="config"
         :has-issue="hasIssue"
         @update:config="emit('update:config', $event)"

@@ -51,6 +51,7 @@ const en: Messages = {
   "settings.salary": "Salary",
   "settings.workdays": "Workdays",
   "settings.workTime": "Work Hours",
+  "settings.overtime": "Overtime",
   "settings.amountAnimation": "Animation",
   "settings.amountAnimationDesc": "Amount display animation",
   "settings.currency": "Currency symbol",
@@ -94,6 +95,12 @@ const en: Messages = {
   "lunchBreak.start": "Start",
   "lunchBreak.end": "End",
 
+  // ── Settings → overtime ────────────────────────────────────────────────
+  "overtime.toggle": "Include overtime",
+  "overtime.hours": "Overtime hours",
+  "overtime.pay": "Overtime pay",
+  "overtime.unitHours": "hours",
+
   // ── Settings → workdays ────────────────────────────────────────────────
   "workdays.label": "Workdays",
   "workdays.mon": "Mon",
@@ -127,8 +134,8 @@ const en: Messages = {
   "about.appVersion": "Version",
   "about.labelSeparator": ": ",
   "about.appAuthor": "Author",
-  "about.openRepo": "Open GitHub repository",
-  "about.repoError": "Unable to open GitHub repository. Please try again later.",
+  "about.openRepo": "Open GitHub profile",
+  "about.repoError": "Unable to open GitHub profile. Please try again later.",
 
   // ── Onboarding ─────────────────────────────────────────────────────────
   "onboarding.ariaLabel": "First-Time Setup",
@@ -177,6 +184,9 @@ const en: Messages = {
   "validation.monthlyPositive": "Monthly salary must be greater than 0",
   "validation.dailyPositive": "Daily wage must be greater than 0",
   "validation.hourlyPositive": "Hourly rate must be greater than 0",
+  "validation.overtimeHours": "Overtime hours cannot be negative",
+  "validation.overtimePay": "Overtime pay cannot be negative",
+  "validation.overtimeHoursForPay": "Enter overtime hours when overtime pay is set",
   "validation.workDaysPositive": "Work days must be greater than 0",
   "validation.workDaysRange": "Work days cannot exceed 31",
   "validation.workdaysMinOne": "Select at least 1 workday",

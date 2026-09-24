@@ -767,6 +767,54 @@ describe("effective hourly rate (实际时薪)", () => {
     dailySalary: 375,
   };
 
+  it("includes configured overtime hours and pay, and keeps the old rate when disabled", () => {
+    const overtimeConfig = {
+      ...unpaidOvertimeConfig,
+      overtimeEnabled: true,
+      overtimeHours: 2,
+      overtimePay: 100,
+    };
+    const before = calculateSalarySnapshot(at("10:00"), overtimeConfig);
+    const halfway = calculateSalarySnapshot(at("19:00"), overtimeConfig);
+    const complete = calculateSalarySnapshot(at("20:00"), overtimeConfig);
+    const disabled = calculateSalarySnapshot(at("20:00"), {
+      ...overtimeConfig,
+      overtimeEnabled: false,
+    });
+
+    expect(before.effectiveHourlyRate).toBe(47.5);
+    expect(before.earnedToday).toBe(375 / 8);
+    expect(halfway.earnedToday).toBe(425);
+    expect(complete.earnedToday).toBe(475);
+    expect(complete.effectiveHourlyRate).toBe(47.5);
+    expect(disabled.earnedToday).toBe(375);
+    expect(disabled.effectiveHourlyRate).toBe(37.5);
+  });
+
+  it("rejects invalid enabled overtime inputs", () => {
+    const issues = validateSalaryConfig(
+      {
+        ...unpaidOvertimeConfig,
+        overtimeEnabled: true,
+        overtimeHours: 0,
+        overtimePay: 20,
+      },
+      vt,
+    );
+    expect(issues.some((issue) => issue.field === "overtimeHours")).toBe(true);
+  });
+
+  it("accrues configured overtime pay beyond the automatic four-hour cap", () => {
+    const snapshot = calculateSalarySnapshot(at("23:00"), {
+      ...unpaidOvertimeConfig,
+      overtimeEnabled: true,
+      overtimeHours: 5,
+      overtimePay: 100,
+    });
+    expect(snapshot.earnedToday).toBe(475);
+    expect(snapshot.effectiveHourlyRate).toBeCloseTo(475 / 13);
+  });
+
   it("equals the configured hourly rate while working normally, in every salary mode", () => {
     // All three modes describe the same 8-hour day: ¥1000/day, ¥900/day, ¥90/h.
     const monthly = calculateSalarySnapshot(at("10:00"), config);

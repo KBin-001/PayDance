@@ -14,7 +14,7 @@ import {
 import { parseTimeToMinutes } from "./salary/time";
 import { mondayOfWeek, parseDateKey, toDateKey } from "./salary/week-cycle";
 
-export const settingsSchemaVersion = 5;
+export const settingsSchemaVersion = 6;
 
 type PersistedSalaryConfig = Partial<SalaryConfig> | undefined;
 export type VersionedSalaryConfigInput = {
@@ -32,6 +32,9 @@ const salaryTypes: SalaryType[] = ["monthly", "daily", "hourly"];
 
 const isPositiveNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value) && value > 0;
+
+const isNonNegativeNumber = (value: unknown): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0;
 
 const isWorkDaysPerMonth = (value: unknown): value is number =>
   isPositiveNumber(value) && value <= maxWorkDaysPerMonth;
@@ -102,12 +105,14 @@ const migrateV4ToV5 = (value: unknown) => {
 
   return { ...config, bigWeekAnchor: unalignedBigWeekAnchor };
 };
+const migrateV5ToV6 = (value: unknown) => asPartialConfig(value);
 
 export const settingsMigrations: Record<number, (value: unknown) => unknown> = {
   1: migrateV1ToV2,
   2: migrateV2ToV3,
   3: migrateV3ToV4,
   4: migrateV4ToV5,
+  5: migrateV5ToV6,
 };
 
 function normalizeSalaryConfig(
@@ -129,6 +134,15 @@ function normalizeSalaryConfig(
     hourlyRate: isPositiveNumber(savedConfig?.hourlyRate)
       ? savedConfig.hourlyRate
       : defaultSalaryConfig.hourlyRate,
+    overtimeEnabled: isBoolean(savedConfig?.overtimeEnabled)
+      ? savedConfig.overtimeEnabled
+      : defaultSalaryConfig.overtimeEnabled,
+    overtimeHours: isNonNegativeNumber(savedConfig?.overtimeHours)
+      ? savedConfig.overtimeHours
+      : defaultSalaryConfig.overtimeHours,
+    overtimePay: isNonNegativeNumber(savedConfig?.overtimePay)
+      ? savedConfig.overtimePay
+      : defaultSalaryConfig.overtimePay,
     workDaysPerMonth: isWorkDaysPerMonth(savedConfig?.workDaysPerMonth)
       ? savedConfig.workDaysPerMonth
       : defaultSalaryConfig.workDaysPerMonth,
@@ -160,6 +174,9 @@ function normalizeSalaryConfig(
     ["monthlySalary", isPositiveNumber],
     ["dailySalary", isPositiveNumber],
     ["hourlyRate", isPositiveNumber],
+    ["overtimeEnabled", isBoolean],
+    ["overtimeHours", isNonNegativeNumber],
+    ["overtimePay", isNonNegativeNumber],
     ["workDaysPerMonth", isWorkDaysPerMonth],
     [
       "workdays",
@@ -195,6 +212,11 @@ function normalizeSalaryConfig(
     config.lunchStart = defaultSalaryConfig.lunchStart;
     config.lunchEnd = defaultSalaryConfig.lunchEnd;
     config.enableLunchBreak = defaultSalaryConfig.enableLunchBreak;
+    recovered = true;
+  }
+
+  if (config.overtimeEnabled && config.overtimePay > 0 && config.overtimeHours === 0) {
+    config.overtimeEnabled = false;
     recovered = true;
   }
 
