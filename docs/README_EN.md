@@ -29,7 +29,7 @@
 
 PayDance (薪跳) is a desktop real-time salary dashboard. Set your salary and working hours, and it shows your income growing second by second on your desktop, making the value of your working time visible.
 
-The main window shows today's earnings, work progress, time remaining, and daily estimate. The mini floating window keeps only the amount, ready for a quick glance from the corner of your screen.
+The main window shows today's earnings, the current rate, work progress, time remaining, and daily estimate. The mini floating window keeps only the amount, ready for a quick glance from the corner of your screen.
 
 <p align="center">
   <img src="posters/poster-02-three-step-setup-en-v1.png" alt="PayDance first-time setup in three steps" width="100%">
@@ -38,6 +38,7 @@ The main window shows today's earnings, work progress, time remaining, and daily
 ## Features
 
 - **Live earnings**: Today's amount updates continuously and is shown to two decimal places.
+- **Live effective hourly rate**: A "Current rate" line under today's earnings divides them by the hours worked today, so it falls while unpaid overtime accumulates.
 - **Common pay schedules**: Supports monthly, daily, and hourly pay, configurable workdays, alternating big and small weeks, lunch-break exclusion, and overnight shifts.
 - **Mini window**: Shows only the amount, stays draggable and always on top, and supports 10%–100% opacity. Double-click it to restore the main window.
 - **Local-first**: No account required; your salary settings stay on your own machine.

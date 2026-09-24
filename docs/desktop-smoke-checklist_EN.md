@@ -8,8 +8,9 @@ Use this checklist before releasing the Windows portable build. Record the PayDa
 
 - [ ] Double-clicking the EXE opens exactly one main window. With no saved position, the window is centered and fully visible.
 - [ ] The three-step onboarding flow appears on first launch, and preferences, salary, and work time can all be completed.
-- [ ] After onboarding, today's earnings, current status, worked time, today's estimate, and progress display correctly.
+- [ ] After onboarding, today's earnings, the current rate, current status, worked time, today's estimate, and progress display correctly.
 - [ ] The status dot matches the state: working green, night shift purple, lunch teal, before work blue, off work slate grey, day off grey, needs-setup red; legible in both themes.
+- [ ] Setting the end time to more than four hours ago (or waiting four hours past it) keeps "Worked" growing and drops the "Current rate" under the amount, while today's earnings and progress stay at the full day and 100%; past four hours of overtime the rate freezes, and the same holds after an overnight shift's end time.
 - [ ] After quitting from the tray and relaunching, onboarding does not reappear, and settings and window state are preserved.
 - [ ] Starting with settings created by the previous release opens the dashboard normally and preserves valid settings.
 

@@ -49,6 +49,16 @@ No. The Web Preview keeps settings in browser `localStorage`; the desktop app us
 
 Choose monthly, daily, or hourly pay. PayDance first works out the day's effective working time from your workdays, start and end times, and lunch-break setting, then works out the day's pay: monthly salary divided by the "Work days per month" setting, daily salary as entered, or hourly rate times the effective working time. Today's amount grows in proportion to the effective working time already elapsed.
 
+### How is the "Current rate" worked out?
+
+It is the line under the amount: today's earnings divided by the hours you have actually worked today. During normal hours earnings accrue in proportion to effective working time, so the rate is exactly what your settings work out to — ¥375 for an 8-hour day reads ¥46.88/h all day long, without flickering.
+
+Once you work past your end time the earnings stop growing (the estimate does not include overtime pay) while "Worked" keeps counting, so the number is diluted honestly: the same ¥375 day plus two overtime hours reads 375 ÷ 10 = ¥37.50/h. Overtime counts for up to four hours, after which the number freezes — the app cannot tell a late night from a window left open, so it stops sliding.
+
+Before work it shows the rate from your settings, on a day off it shows ¥0.00/h, and while the settings need fixing ("Needs Setup") the line is hidden.
+
+The "Hourly" figure in Salary Info is the nominal rate your settings work out to; the "Current rate" under the amount is today's live one. They agree during normal hours and part company once overtime starts.
+
 ### Is the lunch break included in the calculation?
 
 It depends on your settings. With lunch-break exclusion on, the break is not counted as effective work time. If your own pay rule does not deduct it, turn the option off.
@@ -71,7 +81,7 @@ Check the status at the left of the title bar first. "Day Off" means today is no
 
 ### Does the amount match my actual paycheck?
 
-No. It is a live estimate based on the salary and schedule you entered. It does not account for taxes, benefits, bonuses, leave, overtime, or employer-specific payroll rules.
+No. It is a live estimate based on the salary and schedule you entered. It does not account for taxes, benefits, bonuses, leave, overtime pay, or employer-specific payroll rules. Hours worked past your end time do count towards "Worked" and the current rate, but they do not add to the estimated amount.
 
 ## Privacy and Local Data
 
