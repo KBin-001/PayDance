@@ -73,6 +73,10 @@ function getNextTransitionMs(
   return 0;
 }
 
+// With no configured overtime, stop assuming the user is still working after four hours.
+// A configured duration can extend that window so its pay can accrue in full.
+const maxOvertimeMs = 4 * 3_600_000;
+
 const fallbackT: ValidateT = (key: keyof Messages) => key;
 
 export function calculateSalarySnapshot(
@@ -100,10 +104,24 @@ export function calculateSalarySnapshot(
   }
 
   const nowMs = now.getTime();
-  const elapsedWorkMs = spans.reduce((sum, [start, end]) => {
+  const scheduledElapsedMs = spans.reduce((sum, [start, end]) => {
     const spanMs = end.getTime() - start.getTime();
     return sum + clamp(nowMs - start.getTime(), 0, spanMs);
   }, 0);
+
+  // Work time keeps running past the configured end. Freezing it at the planned hours is what used
+  // to make the day look finished the moment the clock struck the end time: the dashboard claimed
+  // the user was done, and the effective hourly rate could never fall.
+  const sessionEndMs = spans[spans.length - 1][1].getTime();
+  const configuredOvertimeMs = config.overtimeEnabled
+    ? config.overtimeHours * 3_600_000
+    : 0;
+  const overtimeMs = clamp(
+    nowMs - sessionEndMs,
+    0,
+    Math.max(maxOvertimeMs, configuredOvertimeMs),
+  );
+  const elapsedWorkMs = scheduledElapsedMs + overtimeMs;
 
   const dailySalary = getDailySalary(config, totalWorkMs);
   const workHours = totalWorkMs / 3_600_000;
@@ -111,6 +129,19 @@ export function calculateSalarySnapshot(
   const minuteRate = hourlyRate / 60;
   const secondRate = minuteRate / 60;
   const progress = clamp(elapsedWorkMs / totalWorkMs, 0, 1);
+  const earnedToday = dailySalary * progress;
+  // Configured overtime changes the projected average rate and accrues its pay after the shift.
+  // Otherwise, the existing unpaid overtime calculation keeps using actual elapsed hours.
+  const overtimeEarned =
+    configuredOvertimeMs > 0
+      ? config.overtimePay * Math.min(overtimeMs / configuredOvertimeMs, 1)
+      : 0;
+  const effectiveHourlyRate = config.overtimeEnabled
+    ? (dailySalary + config.overtimePay) /
+      ((totalWorkMs + Math.max(configuredOvertimeMs, overtimeMs)) / 3_600_000)
+    : overtimeMs > 0
+      ? earnedToday / (elapsedWorkMs / 3_600_000)
+      : hourlyRate;
   const status = getSnapshotStatus(now, spans, elapsedWorkMs, totalWorkMs);
   const isWorking = status === "working";
   const nextTransitionMs = getNextTransitionMs(now, spans, status);
@@ -119,8 +150,9 @@ export function calculateSalarySnapshot(
     (status === "after-work" && spansTouchNightWorkWindow(spans));
 
   return {
-    earnedToday: dailySalary * progress,
+    earnedToday: earnedToday + overtimeEarned,
     dailySalary,
+    effectiveHourlyRate,
     hourlyRate,
     minuteRate,
     secondRate,

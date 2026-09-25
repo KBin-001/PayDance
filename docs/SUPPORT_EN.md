@@ -7,13 +7,13 @@ Before opening an Issue, check:
 - Usage, privacy, and licensing questions: [FAQ](FAQ_EN.md)
 - Release changes: [Changelog](../CHANGELOG_EN.md)
 - Feature scope: [Product Boundaries](PRODUCT_EN.md)
-- Known issues: [GitHub Issues](https://github.com/MrBaoboer/PayDance/issues)
-- Ideas, usage questions, and "is this a bug?": [GitHub Discussions](https://github.com/MrBaoboer/PayDance/discussions)
-- macOS build: open for contribution, see [#65](https://github.com/MrBaoboer/PayDance/issues/65)
+- Known issues: [GitHub Issues](https://github.com/KBin-001/PayDance/issues)
+- Ideas, usage questions, and "is this a bug?": [GitHub Discussions](https://github.com/KBin-001/PayDance/discussions)
+- macOS build: open for contribution, see [#65](https://github.com/KBin-001/PayDance/issues/65)
 
 ## Open an Issue
 
-Choose the appropriate form on the [new Issue page](https://github.com/MrBaoboer/PayDance/issues/new/choose):
+Choose the appropriate form on the [new Issue page](https://github.com/KBin-001/PayDance/issues/new/choose):
 
 - Bugs: include the version, affected surface, reproduction steps, expected result, and actual result.
 - Feature requests: describe the use case and desired outcome. For the validation boundary a platform adaptation must define, see the [Contributing Guide](CONTRIBUTING_EN.md).

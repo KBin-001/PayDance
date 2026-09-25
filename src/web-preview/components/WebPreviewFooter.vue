@@ -15,8 +15,13 @@ defineProps<{
 
 <template>
   <footer class="web-preview__footer" :aria-label="t('web.footerAriaLabel')">
-    <span>{{ appCopyright }}</span>
-    <span class="web-preview__footer-mark" aria-hidden="true"></span>
-    <span>{{ appName }} {{ appEnglishName }}</span>
+    <div class="web-preview__footer-credit">
+      <span>{{ appCopyright }}</span>
+      <span class="web-preview__footer-mark" aria-hidden="true"></span>
+      <span>{{ appName }} {{ appEnglishName }}</span>
+    </div>
+    <a class="web-preview__footer-contact" href="mailto:ypeng9490@gmail.com"
+      >ypeng9490@gmail.com</a
+    >
   </footer>
 </template>

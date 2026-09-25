@@ -8,6 +8,8 @@ import type { Messages } from "../types";
 const zhCN: Messages = {
   // ── Dashboard ───────────────────────────────────────────────────────────
   "dashboard.todayEarnings": "今日入账",
+  "dashboard.effectiveHourlyRate": "当前时薪",
+  "dashboard.perHourUnit": "/h",
   "dashboard.tapToMini": "今日入账 {amount}，双击或按 Enter 进入迷你悬浮模式",
   "dashboard.doubleClickMini": "双击进入迷你悬浮模式",
   "dashboard.statsLabel": "今日收入看板",
@@ -48,6 +50,7 @@ const zhCN: Messages = {
   "settings.salary": "薪资",
   "settings.workdays": "每周工作日",
   "settings.workTime": "工作时间",
+  "settings.overtime": "加班",
   "settings.amountAnimation": "金额变换",
   "settings.amountAnimationDesc": "金额数字变化方式",
   "settings.currency": "货币符号",
@@ -90,6 +93,12 @@ const zhCN: Messages = {
   "lunchBreak.start": "开始",
   "lunchBreak.end": "结束",
 
+  // ── Settings → overtime ────────────────────────────────────────────────
+  "overtime.toggle": "计入加班",
+  "overtime.hours": "加班时长",
+  "overtime.pay": "加班收入",
+  "overtime.unitHours": "小时",
+
   // ── Settings → workdays ────────────────────────────────────────────────
   "workdays.label": "每周工作日",
   "workdays.mon": "一",
@@ -99,6 +108,16 @@ const zhCN: Messages = {
   "workdays.fri": "五",
   "workdays.sat": "六",
   "workdays.sun": "日",
+
+  // ── Settings → big week ────────────────────────────────────────────────
+  "bigWeek.toggle": "大小周模式",
+  "bigWeek.extraDays": "大周额外工作日",
+  "bigWeek.hint": "上面的工作日表示小周（少的那一周），大周再加下面选的额外工作日。",
+  "bigWeek.thisWeek": "本周是",
+  "bigWeek.bigWeek": "大周",
+  "bigWeek.smallWeek": "小周",
+  "bigWeek.monthlyWorkDaysHint":
+    "大小周让月均工作天数从约 21.7 天升到约 23.9 天，建议改成 24 左右；这里只是提示，数字由你自己定。",
 
   // ── Settings → amount mode ─────────────────────────────────────────────
   "amountMode.rolling": "滚动变换",
@@ -112,8 +131,8 @@ const zhCN: Messages = {
   "about.appVersion": "版本",
   "about.labelSeparator": "：",
   "about.appAuthor": "作者",
-  "about.openRepo": "打开 GitHub 仓库",
-  "about.repoError": "无法打开 GitHub 仓库，请稍后重试。",
+  "about.openRepo": "打开 PayDance GitHub 项目",
+  "about.repoError": "无法打开 PayDance GitHub 项目，请稍后重试。",
 
   // ── Onboarding ─────────────────────────────────────────────────────────
   "onboarding.ariaLabel": "首次配置",
@@ -161,6 +180,9 @@ const zhCN: Messages = {
   "validation.monthlyPositive": "月薪需大于 0",
   "validation.dailyPositive": "日薪需大于 0",
   "validation.hourlyPositive": "时薪需大于 0",
+  "validation.overtimeHours": "加班时长不能小于 0",
+  "validation.overtimePay": "加班收入不能小于 0",
+  "validation.overtimeHoursForPay": "填写加班收入时，加班时长需大于 0",
   "validation.workDaysPositive": "工作天数需大于 0",
   "validation.workDaysRange": "工作天数不能超过 31",
   "validation.workdaysMinOne": "至少选 1 天",
@@ -173,6 +195,10 @@ const zhCN: Messages = {
   "validation.lunchSameError": "午休起止时间不能相同",
   "validation.nightLunchOutside": "夜班午休需在工时内",
   "validation.lunchOutside": "午休需在工时内",
+  "validation.bigWeekExtraDaysEmpty": "至少选 1 个大周额外工作日",
+  "validation.bigWeekExtraDaysError": "大周额外工作日必须是一周中的某天",
+  "validation.bigWeekExtraDaysOverlap": "大周额外工作日不能与小周工作日重复",
+  "validation.bigWeekAnchorError": "大周起始周无效，请重新对齐",
 
   // ── Autostart ──────────────────────────────────────────────────────────
   "autostart.error": "自启动设置失败",

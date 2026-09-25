@@ -13,8 +13,10 @@ import {
 } from "../composables/useI18n";
 import type { UpdaterStatus } from "#updater";
 import type { Messages } from "../i18n/types";
+import BigWeekFields from "./settings/BigWeekFields.vue";
 import CurrencySymbolField from "./settings/CurrencySymbolField.vue";
 import LunchBreakFields from "./settings/LunchBreakFields.vue";
+import OvertimeFields from "./settings/OvertimeFields.vue";
 import SalaryAmountFields from "./settings/SalaryAmountFields.vue";
 import SalaryModeControl from "./settings/SalaryModeControl.vue";
 import SettingsAboutFooter from "./settings/SettingsAboutFooter.vue";
@@ -76,13 +78,10 @@ const langOptions = computed(() =>
   })),
 );
 
-const updateLocale = (val: string) => {
-  setLocale(val as Locale);
-};
+const updateLocale = (val: string) => setLocale(val as Locale);
 
-const updateAmountMode = (mode: string) => {
+const updateAmountMode = (mode: string) =>
   emit("update:amountMode", mode as "rolling" | "plain");
-};
 
 const updateConfig = <Key extends keyof SalaryConfig>(
   key: Key,
@@ -128,6 +127,12 @@ const updateConfig = <Key extends keyof SalaryConfig>(
         :workdays="config.workdays"
         @update:workdays="updateConfig('workdays', $event)"
       />
+      <BigWeekFields
+        density="settings"
+        :config="config"
+        :has-issue="hasIssue"
+        @update:config="emit('update:config', $event)"
+      />
     </SettingsGroup>
 
     <SettingsGroup :title="t('settings.workTime')">
@@ -143,6 +148,14 @@ const updateConfig = <Key extends keyof SalaryConfig>(
       <LunchBreakFields
         density="settings"
         variant="settings"
+        :config="config"
+        :has-issue="hasIssue"
+        @update:config="emit('update:config', $event)"
+      />
+    </SettingsGroup>
+
+    <SettingsGroup :title="t('settings.overtime')">
+      <OvertimeFields
         :config="config"
         :has-issue="hasIssue"
         @update:config="emit('update:config', $event)"

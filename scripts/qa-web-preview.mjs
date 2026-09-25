@@ -17,6 +17,9 @@ import {
 } from "./visual-diff.mjs";
 
 const version = packageMetadata.version;
+const displayVersion = `V${version.replace(/\.0$/, "")}`;
+const repositoryUrl = "https://github.com/KBin-001/PayDance";
+const contactEmail = "ypeng9490@gmail.com";
 const sanitizeRunId = (value) =>
   value
     .replace(/[^a-zA-Z0-9._-]/g, "-")
@@ -72,18 +75,18 @@ const localeExpectations = {
 };
 const seoExpectations = {
   "zh-CN": {
-    canonical: "https://paydance.vercel.app/",
+    canonical: "https://paydance.kbinx.com/",
     title: "薪跳 PayDance — Windows 桌面实时工资看板",
   },
   en: {
-    canonical: "https://paydance.vercel.app/en/",
+    canonical: "https://paydance.kbinx.com/en/",
     title: "PayDance — Real-Time Salary Dashboard for Windows",
   },
 };
 const alternateUrls = {
-  "zh-CN": "https://paydance.vercel.app/",
-  en: "https://paydance.vercel.app/en/",
-  "x-default": "https://paydance.vercel.app/",
+  "zh-CN": "https://paydance.kbinx.com/",
+  en: "https://paydance.kbinx.com/en/",
+  "x-default": "https://paydance.kbinx.com/",
 };
 
 const assertSeoMetadata = async (page, viewportName, locale) => {
@@ -186,7 +189,10 @@ const readThemePaint = (page) =>
       languageBackground: read(".lang-switcher", "backgroundColor"),
       rootBackground: read(".web-preview", "backgroundImage"),
       rootColor: read(".web-preview", "color"),
-      themeClass: document.querySelector(".web-preview")?.className ?? null,
+      themeClass:
+        [...(document.querySelector(".web-preview")?.classList ?? [])].find((name) =>
+          name.startsWith("theme-"),
+        ) ?? null,
     };
   });
 
@@ -369,18 +375,27 @@ const assertDom = async (page, viewportName, locale) => {
 
   const versionText = await page.locator(".web-preview__version").innerText();
   if (
-    !versionText.includes(version) ||
+    !versionText.includes(displayVersion) ||
     (!viewportName.includes("mobile") && !versionText.includes("Web Preview"))
   ) {
     throw new Error(`${viewportName}: version text mismatch "${versionText}"`);
   }
 
   const footerText = await page.locator(".web-preview__footer").innerText();
-  const legacyAuthor = ["Mr", "Ba" + "ober"].join(".");
-  if (!footerText.includes("Mr.Baoboer") || footerText.includes(legacyAuthor)) {
-    throw new Error(
-      `${viewportName}: footer author attribution mismatch "${footerText}"`,
-    );
+  if (!footerText.includes("kbin") || !footerText.includes(contactEmail)) {
+    throw new Error(`${viewportName}: footer author or contact mismatch "${footerText}"`);
+  }
+  const contactHref = await page
+    .locator(".web-preview__footer-contact")
+    .getAttribute("href");
+  if (contactHref !== `mailto:${contactEmail}`) {
+    throw new Error(`${viewportName}: contact link mismatch "${contactHref}"`);
+  }
+  const githubHref = await page
+    .locator(".web-preview__action--quiet")
+    .getAttribute("href");
+  if (githubHref !== repositoryUrl) {
+    throw new Error(`${viewportName}: GitHub link mismatch "${githubHref}"`);
   }
 
   const showcase = page.locator("#paydance-preview");

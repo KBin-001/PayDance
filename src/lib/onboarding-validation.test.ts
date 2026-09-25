@@ -60,6 +60,32 @@ describe("onboarding step validation", () => {
     ).toEqual(["workdays", "workTime"]);
   });
 
+  // Switched on, but with nothing to alternate from — the state ticket 03 flags.
+  const brokenBigWeekConfig = {
+    ...defaultSalaryConfig,
+    bigWeekEnabled: true,
+    bigWeekExtraDays: [],
+    bigWeekAnchor: "",
+  };
+
+  it("blocks big-week issues on the final work time step", () => {
+    const config = brokenBigWeekConfig;
+
+    expect(
+      getOnboardingStepIssues(2, config, validateSalaryConfig(config, vt)).map(
+        (issue) => issue.field,
+      ),
+    ).toEqual(["bigWeekExtraDays", "bigWeekAnchor"]);
+  });
+
+  it("does not carry big-week issues onto the salary step", () => {
+    const config = brokenBigWeekConfig;
+
+    expect(getOnboardingStepIssues(1, config, validateSalaryConfig(config, vt))).toEqual(
+      [],
+    );
+  });
+
   it("does not carry salary issues onto the final work time step", () => {
     const config = {
       ...defaultSalaryConfig,

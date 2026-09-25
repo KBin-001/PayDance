@@ -1,10 +1,10 @@
 {
   "name": "pay-dance",
   "private": true,
-  "version": "0.9.10",
-  "author": "Mr.Baoboer",
+  "version": "1.0.0",
+  "author": "kbin",
   "license": "AGPL-3.0-only",
-  "repository": "github:MrBaoboer/PayDance",
+  "repository": "github:KBin-001/PayDance",
   "type": "module",
   "scripts": {
     "dev": "vite --mode desktop",

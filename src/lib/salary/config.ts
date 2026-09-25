@@ -18,8 +18,14 @@ export type SalaryConfig = {
   monthlySalary: number;
   dailySalary: number;
   hourlyRate: number;
+  overtimeEnabled: boolean;
+  overtimeHours: number;
+  overtimePay: number;
   workDaysPerMonth: number;
   workdays: number[];
+  bigWeekEnabled: boolean;
+  bigWeekExtraDays: number[];
+  bigWeekAnchor: string;
   startTime: string;
   endTime: string;
   lunchStart: string;
@@ -30,6 +36,7 @@ export type SalaryConfig = {
 export type SalarySnapshot = {
   earnedToday: number;
   dailySalary: number;
+  effectiveHourlyRate: number;
   hourlyRate: number;
   minuteRate: number;
   secondRate: number;
@@ -47,13 +54,23 @@ export type SalaryConfigIssue = {
   message: string;
 };
 
+// A config that has never been aligned stores this instead of a date. Switching the toggle on fills
+// it with the week the user is in, so an alignment the user already chose is never overwritten.
+export const unalignedBigWeekAnchor = "";
+
 export const defaultSalaryConfig: SalaryConfig = {
   salaryType: "monthly",
   monthlySalary: 10000,
   dailySalary: 360,
   hourlyRate: 45,
+  overtimeEnabled: false,
+  overtimeHours: 0,
+  overtimePay: 0,
   workDaysPerMonth: 22,
   workdays: [1, 2, 3, 4, 5],
+  bigWeekEnabled: false,
+  bigWeekExtraDays: [6],
+  bigWeekAnchor: unalignedBigWeekAnchor,
   startTime: "09:30",
   endTime: "18:30",
   lunchStart: "12:00",
@@ -64,6 +81,7 @@ export const defaultSalaryConfig: SalaryConfig = {
 export const emptySnapshot: SalarySnapshot = {
   earnedToday: 0,
   dailySalary: 0,
+  effectiveHourlyRate: 0,
   hourlyRate: 0,
   minuteRate: 0,
   secondRate: 0,

@@ -19,6 +19,15 @@ describe("rolling amount", () => {
     );
   });
 
+  it("keeps the hero currency symbol in the income accent between ticks", () => {
+    expect(rollingAmountSource).toContain(
+      ".rolling-amount--hero .rolling-amount__currency {\n  color: var(--income-accent);",
+    );
+    expect(rollingAmountSource).not.toContain(
+      ".rolling-amount--hero.is-ticking .rolling-amount__currency",
+    );
+  });
+
   it("keeps the main rolling amount on the original mono font", () => {
     expect(rollingAmountSource).toContain("font-family: var(--font-mono)");
     expect(rollingAmountSource).not.toContain("font-family: var(--font-numeric)");
@@ -27,9 +36,7 @@ describe("rolling amount", () => {
   it("keeps the 0.7.9 hero pulse as a natural filter transition", () => {
     const heroPulseBlock = rollingAmountSource.slice(
       rollingAmountSource.indexOf(".rolling-amount--hero.is-ticking {"),
-      rollingAmountSource.indexOf(
-        ".rolling-amount--hero.is-ticking .rolling-amount__currency",
-      ),
+      rollingAmountSource.indexOf("@media (prefers-reduced-motion: reduce)"),
     );
 
     expect(rollingAmountSource).toContain(
