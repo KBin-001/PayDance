@@ -72,18 +72,18 @@ const localeExpectations = {
 };
 const seoExpectations = {
   "zh-CN": {
-    canonical: "https://paydance.vercel.app/",
+    canonical: "https://paydance.kbinx.com/",
     title: "薪跳 PayDance — Windows 桌面实时工资看板",
   },
   en: {
-    canonical: "https://paydance.vercel.app/en/",
+    canonical: "https://paydance.kbinx.com/en/",
     title: "PayDance — Real-Time Salary Dashboard for Windows",
   },
 };
 const alternateUrls = {
-  "zh-CN": "https://paydance.vercel.app/",
-  en: "https://paydance.vercel.app/en/",
-  "x-default": "https://paydance.vercel.app/",
+  "zh-CN": "https://paydance.kbinx.com/",
+  en: "https://paydance.kbinx.com/en/",
+  "x-default": "https://paydance.kbinx.com/",
 };
 
 const assertSeoMetadata = async (page, viewportName, locale) => {
