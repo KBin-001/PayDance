@@ -40,8 +40,8 @@ const writeNotes = (content) => {
 // The EXE carries an updater signature but no Authenticode certificate yet, so first launches
 // hit SmartScreen; every release body says what to click.
 const smartScreenNotes = [
-  "- 首次运行如出现 SmartScreen「Windows 已保护你的电脑」提示，点击「更多信息 → 仍要运行」。EXE 尚未做代码签名，说明见 https://github.com/MrBaoboer/PayDance/blob/main/docs/FAQ.md",
-  '- If Windows SmartScreen shows "Windows protected your PC" on first launch, choose **More info → Run anyway**. The EXE is not code-signed yet; see https://github.com/MrBaoboer/PayDance/blob/main/docs/FAQ_EN.md',
+  "- 首次运行如出现 SmartScreen「Windows 已保护你的电脑」提示，点击「更多信息 → 仍要运行」。EXE 尚未做代码签名，说明见 https://github.com/KBin-001/PayDance/blob/main/docs/FAQ.md",
+  '- If Windows SmartScreen shows "Windows protected your PC" on first launch, choose **More info → Run anyway**. The EXE is not code-signed yet; see https://github.com/KBin-001/PayDance/blob/main/docs/FAQ_EN.md',
 ];
 
 if (startIndex < 0) {

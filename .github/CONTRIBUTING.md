@@ -1,12 +1,12 @@
 # 参与贡献
 
-> [English version →](https://github.com/MrBaoboer/PayDance/blob/main/docs/CONTRIBUTING_EN.md)
+> [English version →](https://github.com/KBin-001/PayDance/blob/main/docs/CONTRIBUTING_EN.md)
 
 ## 开始之前
 
 - Windows 11 是桌面版的发布与验证基线。
 - 使用 Node.js 24、Rust stable 和 npm。桌面开发还需安装 [Tauri Windows 前置依赖](https://v2.tauri.app/zh-cn/start/prerequisites/)（Microsoft C++ 生成工具和 WebView2）。
-- 先读[产品边界](https://github.com/MrBaoboer/PayDance/blob/main/docs/PRODUCT.md)；定位代码用[架构与修改导航](https://github.com/MrBaoboer/PayDance/blob/main/docs/ARCHITECTURE.md)，界面改动遵循[设计规范](https://github.com/MrBaoboer/PayDance/blob/main/docs/DESIGN.md)。
+- 先读[产品边界](https://github.com/KBin-001/PayDance/blob/main/docs/PRODUCT.md)；定位代码用[架构与修改导航](https://github.com/KBin-001/PayDance/blob/main/docs/ARCHITECTURE.md)，界面改动遵循[设计规范](https://github.com/KBin-001/PayDance/blob/main/docs/DESIGN.md)。
 
 安装依赖后，按需启动桌面版或 Web Preview：
 
@@ -36,7 +36,7 @@ PowerShell 出现中文乱码时，运行 `npm run setup:encoding`；它会向 P
 
 1. 一个 PR 只解决一个问题，不夹带无关重构。
 2. 新行为需要测试；Bug 修复需要回归测试。
-3. 用户可见的改动同步更新 [CHANGELOG.md](https://github.com/MrBaoboer/PayDance/blob/main/CHANGELOG.md) 和 [CHANGELOG_EN.md](https://github.com/MrBaoboer/PayDance/blob/main/CHANGELOG_EN.md) 的 `## Unreleased`；纯测试、内部维护或小幅文档修订无需更新。
+3. 用户可见的改动同步更新 [CHANGELOG.md](https://github.com/KBin-001/PayDance/blob/main/CHANGELOG.md) 和 [CHANGELOG_EN.md](https://github.com/KBin-001/PayDance/blob/main/CHANGELOG_EN.md) 的 `## Unreleased`；纯测试、内部维护或小幅文档修订无需更新。
 4. UI 改动附修改前后截图，覆盖受影响的主题和语言。
 5. 面向用户的文案同时更新 `src/i18n/locales/zh-CN.ts`、`src/i18n/locales/en.ts` 和 `src/i18n/types.ts`，不要在组件中硬编码。
 6. 不要修改版本号；版本由维护者在发布时更新。
@@ -48,11 +48,11 @@ PowerShell 出现中文乱码时，运行 `npm run setup:encoding`；它会向 P
 
 每个非合并提交都必须包含与提交作者邮箱一致的 `Signed-off-by:` 行，可用 `git commit -s` 自动添加；CI 会逐个提交检查。在 GitHub 网页编辑器里提交时，把 `Signed-off-by: 你的名字 <邮箱>` 手动写进提交说明的扩展描述即可。
 
-代码贡献按 [AGPL-3.0-only](https://github.com/MrBaoboer/PayDance/blob/main/LICENSE) 和 [AGPL 第 7 条附加条款](https://github.com/MrBaoboer/PayDance/blob/main/legal/ADDITIONAL_TERMS.md)并入项目；原创文档按 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) 并入，另有说明的除外。提交贡献即表示你有权提交相关内容，并同意适用的项目许可。
+代码贡献按 [AGPL-3.0-only](https://github.com/KBin-001/PayDance/blob/main/LICENSE) 和 [AGPL 第 7 条附加条款](https://github.com/KBin-001/PayDance/blob/main/legal/ADDITIONAL_TERMS.md)并入项目；原创文档按 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) 并入，另有说明的除外。提交贡献即表示你有权提交相关内容，并同意适用的项目许可。
 
-仅当某项贡献需要用于商业、OEM 或其他非 AGPL 授权时，维护者才会在合并前要求签署[贡献者许可协议（CLA）](https://github.com/MrBaoboer/PayDance/blob/main/legal/CLA.md)。DCO 签署行不等同于签署 CLA。
+仅当某项贡献需要用于商业、OEM 或其他非 AGPL 授权时，维护者才会在合并前要求签署[贡献者许可协议（CLA）](https://github.com/KBin-001/PayDance/blob/main/legal/CLA.md)。DCO 签署行不等同于签署 CLA。
 
-商标和品牌资产规则见 [TRADEMARK.md](https://github.com/MrBaoboer/PayDance/blob/main/legal/TRADEMARK.md) 与 [BRAND-ASSETS.md](https://github.com/MrBaoboer/PayDance/blob/main/legal/BRAND-ASSETS.md)。
+商标和品牌资产规则见 [TRADEMARK.md](https://github.com/KBin-001/PayDance/blob/main/legal/TRADEMARK.md) 与 [BRAND-ASSETS.md](https://github.com/KBin-001/PayDance/blob/main/legal/BRAND-ASSETS.md)。
 
 ## 验证
 
@@ -79,7 +79,7 @@ cargo test
 
 ## 相关规则
 
-- [行为准则](https://github.com/MrBaoboer/PayDance/blob/main/CODE_OF_CONDUCT.md)
-- [维护者说明](https://github.com/MrBaoboer/PayDance/blob/main/docs/MAINTAINERS.md)
-- [治理说明](https://github.com/MrBaoboer/PayDance/blob/main/docs/GOVERNANCE.md)
-- [维护约定](https://github.com/MrBaoboer/PayDance/blob/main/docs/MAINTENANCE.md)：维护者的推送、依赖与发布流程
+- [行为准则](https://github.com/KBin-001/PayDance/blob/main/CODE_OF_CONDUCT.md)
+- [维护者说明](https://github.com/KBin-001/PayDance/blob/main/docs/MAINTAINERS.md)
+- [治理说明](https://github.com/KBin-001/PayDance/blob/main/docs/GOVERNANCE.md)
+- [维护约定](https://github.com/KBin-001/PayDance/blob/main/docs/MAINTENANCE.md)：维护者的推送、依赖与发布流程

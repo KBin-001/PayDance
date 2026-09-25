@@ -16,7 +16,7 @@ Releases and security fixes cover the **Windows 11 desktop app** and the **Web P
 
 Please do not report security vulnerabilities through public Issues. Use one of these private channels instead:
 
-- **GitHub Security Advisory** (preferred): submit at [Security Advisories](https://github.com/MrBaoboer/PayDance/security/advisories/new)
+- **GitHub Security Advisory** (preferred): submit at [Security Advisories](https://github.com/KBin-001/PayDance/security/advisories/new)
 - **Email**: use the address listed on the [author's GitHub profile](https://github.com/MrBaoboer), with `[SECURITY]` in the subject line
 
 Include a description of the vulnerability, steps to reproduce, the affected versions, and any mitigations you have found.

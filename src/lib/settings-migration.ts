@@ -6,13 +6,15 @@
 import {
   defaultSalaryConfig,
   maxWorkDaysPerMonth,
+  unalignedBigWeekAnchor,
   validateSalaryConfig,
   type SalaryConfig,
   type SalaryType,
 } from "./salary";
 import { parseTimeToMinutes } from "./salary/time";
+import { mondayOfWeek, parseDateKey, toDateKey } from "./salary/week-cycle";
 
-export const settingsSchemaVersion = 4;
+export const settingsSchemaVersion = 6;
 
 type PersistedSalaryConfig = Partial<SalaryConfig> | undefined;
 export type VersionedSalaryConfigInput = {
@@ -31,6 +33,9 @@ const salaryTypes: SalaryType[] = ["monthly", "daily", "hourly"];
 const isPositiveNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value) && value > 0;
 
+const isNonNegativeNumber = (value: unknown): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0;
+
 const isWorkDaysPerMonth = (value: unknown): value is number =>
   isPositiveNumber(value) && value <= maxWorkDaysPerMonth;
 
@@ -45,6 +50,13 @@ const isValidTime = (value: unknown): value is string =>
 const isWorkday = (value: unknown): value is number =>
   Number.isInteger(value) && Number(value) >= 0 && Number(value) <= 6;
 
+const isBigWeekExtraDays = (value: unknown): value is number[] =>
+  Array.isArray(value) && value.length > 0 && value.every(isWorkday);
+
+const isBigWeekAnchor = (value: unknown): value is string =>
+  typeof value === "string" &&
+  (value === unalignedBigWeekAnchor || parseDateKey(value) !== null);
+
 const normalizeWorkdays = (workdays: unknown) => {
   if (!Array.isArray(workdays)) return [...defaultWorkdays];
 
@@ -54,6 +66,22 @@ const normalizeWorkdays = (workdays: unknown) => {
   }
 
   return uniqueWorkdays.sort((a, b) => a - b);
+};
+
+const normalizeBigWeekExtraDays = (extraDays: unknown) => {
+  if (!isBigWeekExtraDays(extraDays)) return [...defaultSalaryConfig.bigWeekExtraDays];
+
+  return [...new Set(extraDays)].sort((a, b) => a - b);
+};
+
+// Only the week an anchor falls in decides the phase, so any day of that week is stored as its
+// Monday. That keeps a hand-edited anchor from shifting the whole alternation by a week. An anchor
+// that cannot be read at all becomes the "never aligned" state instead of an arbitrary phase, and
+// validation points at it the moment the toggle is on.
+const normalizeBigWeekAnchor = (anchor: unknown) => {
+  const parsed = typeof anchor === "string" ? parseDateKey(anchor) : null;
+
+  return parsed ? toDateKey(mondayOfWeek(parsed)) : unalignedBigWeekAnchor;
 };
 
 const asPartialConfig = (value: unknown): PersistedSalaryConfig =>
@@ -68,10 +96,23 @@ const migrateV1ToV2 = (value: unknown) => asPartialConfig(value);
 const migrateV2ToV3 = (value: unknown) => asPartialConfig(value);
 const migrateV3ToV4 = (value: unknown) => asPartialConfig(value);
 
+// The anchor changed meaning in v5. A v4 config stored either a fixed placeholder or the week the
+// toggle happened to be switched on in, and neither is a phase the user picked, so v5 starts such a
+// config unaligned: the phase is written the next time the toggle is switched on.
+const migrateV4ToV5 = (value: unknown) => {
+  const config = asPartialConfig(value);
+  if (!config) return config;
+
+  return { ...config, bigWeekAnchor: unalignedBigWeekAnchor };
+};
+const migrateV5ToV6 = (value: unknown) => asPartialConfig(value);
+
 export const settingsMigrations: Record<number, (value: unknown) => unknown> = {
   1: migrateV1ToV2,
   2: migrateV2ToV3,
   3: migrateV3ToV4,
+  4: migrateV4ToV5,
+  5: migrateV5ToV6,
 };
 
 function normalizeSalaryConfig(
@@ -93,10 +134,24 @@ function normalizeSalaryConfig(
     hourlyRate: isPositiveNumber(savedConfig?.hourlyRate)
       ? savedConfig.hourlyRate
       : defaultSalaryConfig.hourlyRate,
+    overtimeEnabled: isBoolean(savedConfig?.overtimeEnabled)
+      ? savedConfig.overtimeEnabled
+      : defaultSalaryConfig.overtimeEnabled,
+    overtimeHours: isNonNegativeNumber(savedConfig?.overtimeHours)
+      ? savedConfig.overtimeHours
+      : defaultSalaryConfig.overtimeHours,
+    overtimePay: isNonNegativeNumber(savedConfig?.overtimePay)
+      ? savedConfig.overtimePay
+      : defaultSalaryConfig.overtimePay,
     workDaysPerMonth: isWorkDaysPerMonth(savedConfig?.workDaysPerMonth)
       ? savedConfig.workDaysPerMonth
       : defaultSalaryConfig.workDaysPerMonth,
     workdays: normalizeWorkdays(savedConfig?.workdays),
+    bigWeekEnabled: isBoolean(savedConfig?.bigWeekEnabled)
+      ? savedConfig.bigWeekEnabled
+      : defaultSalaryConfig.bigWeekEnabled,
+    bigWeekExtraDays: normalizeBigWeekExtraDays(savedConfig?.bigWeekExtraDays),
+    bigWeekAnchor: normalizeBigWeekAnchor(savedConfig?.bigWeekAnchor),
     startTime: isValidTime(savedConfig?.startTime)
       ? savedConfig.startTime
       : defaultSalaryConfig.startTime,
@@ -119,11 +174,17 @@ function normalizeSalaryConfig(
     ["monthlySalary", isPositiveNumber],
     ["dailySalary", isPositiveNumber],
     ["hourlyRate", isPositiveNumber],
+    ["overtimeEnabled", isBoolean],
+    ["overtimeHours", isNonNegativeNumber],
+    ["overtimePay", isNonNegativeNumber],
     ["workDaysPerMonth", isWorkDaysPerMonth],
     [
       "workdays",
       (value) => Array.isArray(value) && value.length > 0 && value.every(isWorkday),
     ],
+    ["bigWeekEnabled", isBoolean],
+    ["bigWeekExtraDays", isBigWeekExtraDays],
+    ["bigWeekAnchor", isBigWeekAnchor],
     ["startTime", isValidTime],
     ["endTime", isValidTime],
     ["lunchStart", isValidTime],
@@ -151,6 +212,19 @@ function normalizeSalaryConfig(
     config.lunchStart = defaultSalaryConfig.lunchStart;
     config.lunchEnd = defaultSalaryConfig.lunchEnd;
     config.enableLunchBreak = defaultSalaryConfig.enableLunchBreak;
+    recovered = true;
+  }
+
+  if (config.overtimeEnabled && config.overtimePay > 0 && config.overtimeHours === 0) {
+    config.overtimeEnabled = false;
+    recovered = true;
+  }
+
+  // Mirrors the lunch-window repair: the toggle cannot stay on without a phase to alternate from,
+  // and a migration has no clock to align with. Switching it off leaves a config that validates
+  // again, and switching it back on writes the week the user is in.
+  if (config.bigWeekEnabled && !parseDateKey(config.bigWeekAnchor)) {
+    config.bigWeekEnabled = false;
     recovered = true;
   }
 

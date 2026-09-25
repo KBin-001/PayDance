@@ -33,7 +33,7 @@
     "core:window:allow-start-resize-dragging",
     {
       "identifier": "opener:allow-open-url",
-      "allow": [{ "url": "https://github.com/MrBaoboer/PayDance" }]
+      "allow": [{ "url": "https://github.com/KBin-001/PayDance" }]
     },
     "store:allow-delete",
     "store:allow-get",

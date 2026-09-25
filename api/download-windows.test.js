@@ -34,9 +34,9 @@ const fakeResponse = () => {
 describe("site download endpoint", () => {
   it("reads the newest tag from GitHub's releases/latest redirect", () => {
     expect(
-      resolveLatestTag("https://github.com/MrBaoboer/PayDance/releases/tag/v0.9.10"),
+      resolveLatestTag("https://github.com/KBin-001/PayDance/releases/tag/v0.9.10"),
     ).toBe("v0.9.10");
-    expect(resolveLatestTag("/MrBaoboer/PayDance/releases/tag/v1.0.0-rc.1")).toBe(
+    expect(resolveLatestTag("/KBin-001/PayDance/releases/tag/v1.0.0-rc.1")).toBe(
       "v1.0.0-rc.1",
     );
   });
@@ -44,28 +44,28 @@ describe("site download endpoint", () => {
   it("ignores redirects that are not a release tag of this repository", () => {
     expect(resolveLatestTag(null)).toBeNull();
     expect(resolveLatestTag("")).toBeNull();
-    expect(resolveLatestTag("https://github.com/MrBaoboer/PayDance/releases")).toBeNull();
+    expect(resolveLatestTag("https://github.com/KBin-001/PayDance/releases")).toBeNull();
     expect(
       resolveLatestTag("https://github.com/someone/else/releases/tag/v0.9.10"),
     ).toBeNull();
     expect(
-      resolveLatestTag("https://github.com/MrBaoboer/PayDance/releases/tag/main"),
+      resolveLatestTag("https://github.com/KBin-001/PayDance/releases/tag/main"),
     ).toBeNull();
     expect(
-      resolveLatestTag("https://github.com/MrBaoboer/PayDance/releases/tag/v0.9.10/../x"),
+      resolveLatestTag("https://github.com/KBin-001/PayDance/releases/tag/v0.9.10/../x"),
     ).toBeNull();
     expect(resolveLatestTag("not a url at all ://")).toBeNull();
   });
 
   it("builds the versioned asset URL that the release workflow uploads", () => {
     expect(windowsAssetUrl("v0.9.10")).toBe(
-      "https://github.com/MrBaoboer/PayDance/releases/download/v0.9.10/pay-dance-v0.9.10-windows-x64.exe",
+      "https://github.com/KBin-001/PayDance/releases/download/v0.9.10/pay-dance-v0.9.10-windows-x64.exe",
     );
   });
 
   it("redirects to the newest versioned EXE when GitHub answers", async () => {
     const fetchImpl = vi.fn(async () =>
-      redirectTo("https://github.com/MrBaoboer/PayDance/releases/tag/v0.9.10"),
+      redirectTo("https://github.com/KBin-001/PayDance/releases/tag/v0.9.10"),
     );
 
     await expect(resolveWindowsDownload(fetchImpl)).resolves.toEqual({
@@ -97,7 +97,7 @@ describe("site download endpoint", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () =>
-        redirectTo("https://github.com/MrBaoboer/PayDance/releases/tag/v0.9.10"),
+        redirectTo("https://github.com/KBin-001/PayDance/releases/tag/v0.9.10"),
       ),
     );
     try {

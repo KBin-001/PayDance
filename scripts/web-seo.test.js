@@ -43,8 +43,8 @@ describe("web SEO build helpers", () => {
   it("creates a sitemap for the Chinese and English canonical URLs", () => {
     const sitemap = createSitemap("2030-01-02");
 
-    expect(sitemap).toContain("<loc>https://paydance.vercel.app/</loc>");
-    expect(sitemap).toContain("<loc>https://paydance.vercel.app/en/</loc>");
+    expect(sitemap).toContain("<loc>https://paydance.kbinx.com/</loc>");
+    expect(sitemap).toContain("<loc>https://paydance.kbinx.com/en/</loc>");
     expect(sitemap.match(/<lastmod>2030-01-02<\/lastmod>/g)).toHaveLength(2);
   });
 });
@@ -84,7 +84,7 @@ describe("web preview static hero", () => {
 
   it("sends Vercel visitors through the download endpoint and mirrors to the Release page", () => {
     expect(resolveWindowsDownloadUrl({ vercel: true })).toBe("/download/windows");
-    expect(downloadUrl).toBe("https://github.com/MrBaoboer/PayDance/releases/latest");
+    expect(downloadUrl).toBe("https://github.com/KBin-001/PayDance/releases/latest");
   });
 
   it("preloads every emitted woff2 font under the configured base", () => {

@@ -16,6 +16,8 @@ const salaryIssueFieldsByType = {
 };
 
 const workTimeIssueFields = new Set<SalaryConfigIssue["field"]>([
+  "bigWeekAnchor",
+  "bigWeekExtraDays",
   "endTime",
   "lunchEnd",
   "lunchStart",

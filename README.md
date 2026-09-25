@@ -12,14 +12,14 @@
 <p align="center">
   <a href="https://paydance.vercel.app/"><strong>在线体验</strong></a>
   &nbsp;&nbsp;·&nbsp;&nbsp;
-  <a href="https://github.com/MrBaoboer/PayDance/releases/latest"><strong>下载桌面版</strong></a>
+  <a href="https://github.com/KBin-001/PayDance/releases/latest"><strong>下载桌面版</strong></a>
   &nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="docs/README_EN.md">English</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/MrBaoboer/PayDance/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/MrBaoboer/PayDance?style=flat&label=release&labelColor=1F2328&color=F59E0B"></a>
-  <a href="https://github.com/MrBaoboer/PayDance/releases"><img alt="下载量" src="https://img.shields.io/github/downloads/MrBaoboer/PayDance/total?style=flat&label=downloads&labelColor=1F2328&color=3D444D"></a>
+  <a href="https://github.com/KBin-001/PayDance/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/KBin-001/PayDance?style=flat&label=release&labelColor=1F2328&color=F59E0B"></a>
+  <a href="https://github.com/KBin-001/PayDance/releases"><img alt="下载量" src="https://img.shields.io/github/downloads/KBin-001/PayDance/total?style=flat&label=downloads&labelColor=1F2328&color=3D444D"></a>
   <a href="LICENSE"><img alt="许可" src="https://img.shields.io/badge/license-AGPL--3.0--only-3D444D?style=flat&labelColor=1F2328"></a>
 </p>
 
@@ -29,7 +29,7 @@
 
 薪跳 PayDance 是一款桌面实时工资看板。配置薪资与上下班时间后，它会在桌面实时显示每一秒的收入增长，让劳动时间价值变得可视化。
 
-主窗口展示今日入账、工作进度、剩余时间和今日预计；迷你悬浮窗只保留金额数字，适合放在屏幕角落随时扫一眼。
+主窗口展示今日入账、当前时薪、工作进度、剩余时间和今日预计；迷你悬浮窗只保留金额数字，适合放在屏幕角落随时扫一眼。
 
 <p align="center">
   <img src="docs/posters/poster-02-three-step-setup-v3.png" alt="薪跳 PayDance 首次配置三步上手" width="100%">
@@ -38,7 +38,8 @@
 ## 主要功能
 
 - **实时金额**：今日入账持续更新，精确到小数点后 2 位。
-- **常见工作制**：月薪/日薪/时薪自动换算，支持每周工作日、午休剔除、跨零点夜班。
+- **实时实际时薪**：「今日入账」下方显示「当前时薪」，即今日入账 ÷ 今日已工作时长；加班时段没有加班费时，这个数字会随加班时间下降。
+- **常见工作制**：月薪/日薪/时薪自动换算，支持每周工作日、大小周、午休剔除、跨零点夜班。
 - **迷你悬浮窗**：只显示金额，可拖拽、可置顶，透明度 10%–100% 可调；双击即可恢复主窗口。
 - **本地优先**：不需要账号，薪资配置只保存在你自己的电脑上。
 - **中英双语**：界面、托盘、校验提示完整覆盖简体中文与 English。
