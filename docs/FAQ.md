@@ -8,7 +8,7 @@
 
 ### 用 Web Preview 还是 Windows 桌面版？
 
-[Web Preview](https://paydance.vercel.app/) 用于体验界面和计算逻辑。迷你悬浮窗和透明度可在浏览器内模拟；托盘、置顶和开机自启动仅在 Windows 桌面版提供。
+[Web Preview](https://dance.kbinx.com/) 用于体验界面和计算逻辑。迷你悬浮窗和透明度可在浏览器内模拟；托盘、置顶和开机自启动仅在 Windows 桌面版提供。
 
 ### 该下载哪个文件？
 

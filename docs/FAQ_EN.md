@@ -8,7 +8,7 @@ For product scope, see [PRODUCT_EN.md](PRODUCT_EN.md); for support and feedback 
 
 ### Web Preview or the Windows desktop app?
 
-Use the [Web Preview](https://paydance.vercel.app/en/) to try the interface and calculation logic. The mini window and opacity control are simulated in the browser; the system tray, always-on-top mode, and auto-start are available only in the Windows desktop app.
+Use the [Web Preview](https://dance.kbinx.com/en/) to try the interface and calculation logic. The mini window and opacity control are simulated in the browser; the system tray, always-on-top mode, and auto-start are available only in the Windows desktop app.
 
 ### Which file should I download?
 

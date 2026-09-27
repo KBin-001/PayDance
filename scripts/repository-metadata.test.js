@@ -19,7 +19,7 @@ const dependabotSettings = dependabotConfig
 // Collapsed so adjacency can be asserted with plain substring matching; building
 // a RegExp from these names would reintroduce js/incomplete-sanitization.
 const collapsedDependabotSettings = dependabotSettings.replace(/\s+/g, " ");
-const siteWindowsDownloadUrl = "https://paydance.vercel.app/download/windows";
+const siteWindowsDownloadUrl = "https://dance.kbinx.com/download/windows";
 const legacyAdditionalTermsReference = `see /${["ADDITIONAL_TERMS", "md"].join(".")}`;
 const binaryExtensions = new Set([".ico", ".png", ".woff2"]);
 const existsInWorktree = (path) => existsSync(resolve(repoRoot, path));
@@ -106,7 +106,7 @@ describe("repository metadata", () => {
       expect(readme).toContain(siteWindowsDownloadUrl);
       expect(readme).not.toContain("releases/latest/download/");
       expect(readme).not.toContain("releases/download/v0.7.16/pay-dance.exe");
-      expect(readme).not.toContain("mrbaoboer.github.io/PayDance/pay-dance.exe");
+      expect(readme).not.toContain("kbin-001.github.io/PayDance/pay-dance.exe");
     }
 
     // versionedDesktopChecksumName is removed from README to prevent hardcoded version churn
@@ -117,9 +117,9 @@ describe("repository metadata", () => {
     const posterPath = "docs/posters/poster-02-three-step-setup-en-v1.png";
     const englishReadme = read("docs/README_EN.md");
 
-    expect(englishReadme).toContain("https://paydance.vercel.app/en/");
+    expect(englishReadme).toContain("https://dance.kbinx.com/en/");
     expect(englishReadme).not.toContain(
-      '<a href="https://paydance.vercel.app/"><strong>Live Preview</strong></a>',
+      '<a href="https://dance.kbinx.com/"><strong>Live Preview</strong></a>',
     );
     expect(englishReadme).toContain('src="posters/poster-02-three-step-setup-en-v1.png"');
     expect(existsInWorktree(posterPath)).toBe(true);
@@ -219,7 +219,7 @@ describe("repository metadata", () => {
     expect(postReleaseSmoke).toContain('EXE="pay-dance-v${VERSION}-windows-x64.exe"');
     expect(postReleaseSmoke).toContain("expected exactly one .exe asset");
     expect(postReleaseSmoke).toContain("releases/download/${EXPECTED_TAG}/${EXE}");
-    expect(postReleaseSmoke).toContain("https://paydance.vercel.app/download/windows");
+    expect(postReleaseSmoke).toContain("https://dance.kbinx.com/download/windows");
     expect(postReleaseSmoke).not.toContain("pay-dance-windows-x64.exe");
   });
 

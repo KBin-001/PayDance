@@ -1,6 +1,12 @@
 name: Post-Release Smoke
 
 on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to verify, for example v1.0.0"
+        required: true
+        type: string
   workflow_run:
     workflows: ["Release"]
     types:
@@ -11,13 +17,13 @@ permissions:
   actions: read
 
 concurrency:
-  group: smoke-${{ github.event.workflow_run.id }}
+  group: smoke-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.workflow_run.id }}
   cancel-in-progress: false
 
 jobs:
   smoke:
     name: Verify release assets
-    if: github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
@@ -32,6 +38,7 @@ jobs:
           node-version: 24
 
       - name: Resolve release tag from workflow artifact
+        if: github.event_name == 'workflow_run'
         run: |
           mkdir -p /tmp/release-artifact /tmp/smoke
           gh run download "${{ github.event.workflow_run.id }}" \
@@ -54,6 +61,23 @@ jobs:
           echo "EXPECTED_TAG=$EXPECTED_TAG" >> "$GITHUB_ENV"
           echo "MANIFEST_PATH=$MANIFEST_PATH" >> "$GITHUB_ENV"
           echo "Resolved expected release tag: $EXPECTED_TAG"
+
+      - name: Resolve release tag from manual dispatch
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          if ! echo "$INPUT_TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$'; then
+            echo "ERROR: invalid release tag: $INPUT_TAG"
+            exit 1
+          fi
+          echo "EXPECTED_TAG=$INPUT_TAG" >> "$GITHUB_ENV"
+          mkdir -p /tmp/release-artifact /tmp/smoke
+          gh release download "$INPUT_TAG" \
+            --repo ${{ github.repository }} \
+            --pattern release-manifest.json \
+            --dir /tmp/release-artifact
+          echo "MANIFEST_PATH=/tmp/release-artifact/release-manifest.json" >> "$GITHUB_ENV"
 
       - name: Fetch expected release info
         id: public_release
@@ -140,7 +164,7 @@ jobs:
           VERSION=$(echo "$EXPECTED_TAG" | sed 's/^v//')
           EXPECTED="https://github.com/${{ github.repository }}/releases/download/${EXPECTED_TAG}/pay-dance-v${VERSION}-windows-x64.exe"
           # The query string bypasses the endpoint's 5-minute edge cache so the check sees this release.
-          URL="https://paydance.vercel.app/download/windows?smoke=${EXPECTED_TAG}"
+          URL="https://dance.kbinx.com/download/windows?smoke=${EXPECTED_TAG}"
           echo "Checking: $URL"
           LOCATION=$(curl -sI -o /dev/null -w "%{redirect_url}" "$URL")
           if [ "$LOCATION" != "$EXPECTED" ]; then

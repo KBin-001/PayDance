@@ -68,7 +68,7 @@ Release workflow 在 `windows-2025` 上构建便携 EXE，先以草稿创建 Rel
 ### 发布链路不变量
 
 - `latest.json` 的下载地址钉在对应 tag：`releases/download/v<版本>/pay-dance-v<版本>-windows-x64.exe`；updater 端点固定为 `releases/latest/download/latest.json`。
-- 每个 Release 只带一个 EXE，文件名带版本号。官网按钮与 README 的下载链接是 `https://paydance.vercel.app/download/windows`（`api/download-windows.js`，由 `vercel.json` 的 rewrite 挂载）：它读取 GitHub `releases/latest` 的跳转拿到最新 tag，再 302 到对应文件，边缘缓存 5 分钟；解析失败退回 Release 页面。GitHub Pages 镜像没有函数，按钮直接指向 Release 页面。
+- 每个 Release 只带一个 EXE，文件名带版本号。官网按钮与 README 的下载链接是 `https://dance.kbinx.com/download/windows`（`api/download-windows.js`，由 `vercel.json` 的 rewrite 挂载）：它读取 GitHub `releases/latest` 的跳转拿到最新 tag，再 302 到对应文件，边缘缓存 5 分钟；解析失败退回 Release 页面。GitHub Pages 镜像没有函数，按钮直接指向 Release 页面。
 - `.sha256` 匹配实际 EXE。`.sig` 是 Tauri updater 签名，不是 Windows Authenticode 发布者签名；接入 Authenticode 前先确认成本、证书来源、续期方式和失败回滚路径。
 - `pay-dance-sbom.spdx.json` 随 Release 归档。
 - GitHub Actions 的 `uses:` 固定到 40 位 Commit SHA，并在行尾保留版本注释。

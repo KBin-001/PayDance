@@ -75,18 +75,18 @@ const localeExpectations = {
 };
 const seoExpectations = {
   "zh-CN": {
-    canonical: "https://paydance.kbinx.com/",
+    canonical: "https://dance.kbinx.com/",
     title: "薪跳 PayDance — Windows 桌面实时工资看板",
   },
   en: {
-    canonical: "https://paydance.kbinx.com/en/",
+    canonical: "https://dance.kbinx.com/en/",
     title: "PayDance — Real-Time Salary Dashboard for Windows",
   },
 };
 const alternateUrls = {
-  "zh-CN": "https://paydance.kbinx.com/",
-  en: "https://paydance.kbinx.com/en/",
-  "x-default": "https://paydance.kbinx.com/",
+  "zh-CN": "https://dance.kbinx.com/",
+  en: "https://dance.kbinx.com/en/",
+  "x-default": "https://dance.kbinx.com/",
 };
 
 const assertSeoMetadata = async (page, viewportName, locale) => {
