@@ -68,7 +68,7 @@ The Release workflow builds the portable EXE on `windows-2025`, creates the Rele
 ### Release Chain Invariants
 
 - `latest.json` pins its download URL to the tag: `releases/download/v<version>/pay-dance-v<version>-windows-x64.exe`; the updater endpoint stays `releases/latest/download/latest.json`.
-- Every Release carries exactly one EXE, named after its version. The site button and the README link to `https://paydance.vercel.app/download/windows` (`api/download-windows.js`, mounted by the rewrite in `vercel.json`): it reads the redirect GitHub returns for `releases/latest` to learn the newest tag, then answers 302 to that file, cached at the edge for 5 minutes; if the tag cannot be resolved it falls back to the Release page. The GitHub Pages mirror has no functions, so its button links straight to the Release page.
+- Every Release carries exactly one EXE, named after its version. The site button and the README link to `https://dance.kbinx.com/download/windows` (`api/download-windows.js`, mounted by the rewrite in `vercel.json`): it reads the redirect GitHub returns for `releases/latest` to learn the newest tag, then answers 302 to that file, cached at the edge for 5 minutes; if the tag cannot be resolved it falls back to the Release page. The GitHub Pages mirror has no functions, so its button links straight to the Release page.
 - `.sha256` matches the actual EXE. `.sig` is the Tauri updater signature, not a Windows Authenticode publisher signature; before adding Authenticode, confirm cost, certificate source, renewal, and rollback.
 - `pay-dance-sbom.spdx.json` is archived with every Release.
 - Every GitHub Actions `uses:` is pinned to a 40-character commit SHA with a version comment.

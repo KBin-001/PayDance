@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://paydance.vercel.app/en/"><strong>Live Preview</strong></a>
+  <a href="https://dance.kbinx.com/en/"><strong>Live Preview</strong></a>
   &nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="https://github.com/KBin-001/PayDance/releases/latest"><strong>Download</strong></a>
   &nbsp;&nbsp;·&nbsp;&nbsp;
@@ -51,8 +51,8 @@ The main window shows today's earnings, the current rate, work progress, time re
 
 | &nbsp; | Link | Notes |
 |:---:|:---:|:---:|
-| 🌐 | **[Live Preview](https://paydance.vercel.app/en/)** | Browser-based, all core features available, nothing to install |
-| ⬇️ | **[Windows Desktop](https://paydance.vercel.app/download/windows)** | Portable EXE with tray, always-on-top, mini float, and auto-start |
+| 🌐 | **[Live Preview](https://dance.kbinx.com/en/)** | Browser-based, all core features available, nothing to install |
+| ⬇️ | **[Windows Desktop](https://dance.kbinx.com/download/windows)** | Portable EXE with tray, always-on-top, mini float, and auto-start |
 
 </div>
 

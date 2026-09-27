@@ -3,7 +3,7 @@
 //
 // Additional terms: see /legal/ADDITIONAL_TERMS.md
 
-const siteUrl = "https://paydance.kbinx.com/";
+const siteUrl = "https://dance.kbinx.com/";
 const englishSiteUrl = `${siteUrl}en/`;
 const repositoryUrl = "https://github.com/KBin-001/PayDance";
 
