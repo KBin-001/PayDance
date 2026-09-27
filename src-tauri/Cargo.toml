@@ -1,10 +1,10 @@
 [package]
 name = "pay-dance"
-version = "0.9.10"
+version = "1.0.0"
 description = "薪跳 · 桌面实时工资看板"
-authors = ["Mr.Baoboer"]
+authors = ["kbin"]
 license = "AGPL-3.0-only"
-repository = "https://github.com/MrBaoboer/PayDance"
+repository = "https://github.com/KBin-001/PayDance"
 edition = "2024"
 
 [lib]

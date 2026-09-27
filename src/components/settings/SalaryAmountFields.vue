@@ -131,6 +131,12 @@ const updateNumberConfig = <Key extends keyof SalaryConfig>(key: Key, event: Eve
         <span class="field-unit">{{ t("salaryAmount.unitDays") }}</span>
       </span>
     </label>
+    <p
+      v-if="config.salaryType === 'monthly' && config.bigWeekEnabled"
+      class="field-grid__hint"
+    >
+      {{ t("bigWeek.monthlyWorkDaysHint") }}
+    </p>
   </div>
 </template>
 
@@ -147,6 +153,16 @@ const updateNumberConfig = <Key extends keyof SalaryConfig>(key: Key, event: Eve
 
 .field-grid--onboarding {
   gap: clamp(12px, 2.7cqh, 15px);
+}
+
+.field-grid__hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-dashboard);
+  font-size: var(--ui-font-xs, 12px);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .field {

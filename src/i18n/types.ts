@@ -13,6 +13,8 @@
 export interface Messages {
   // ── Dashboard ───────────────────────────────────────────────────────────
   "dashboard.todayEarnings": string;
+  "dashboard.effectiveHourlyRate": string;
+  "dashboard.perHourUnit": string;
   "dashboard.tapToMini": string;
   "dashboard.doubleClickMini": string;
   "dashboard.statsLabel": string;
@@ -53,6 +55,7 @@ export interface Messages {
   "settings.salary": string;
   "settings.workdays": string;
   "settings.workTime": string;
+  "settings.overtime": string;
   "settings.amountAnimation": string;
   "settings.amountAnimationDesc": string;
   "settings.currency": string;
@@ -94,6 +97,12 @@ export interface Messages {
   "lunchBreak.start": string;
   "lunchBreak.end": string;
 
+  // ── Settings → overtime ────────────────────────────────────────────────
+  "overtime.toggle": string;
+  "overtime.hours": string;
+  "overtime.pay": string;
+  "overtime.unitHours": string;
+
   // ── Settings → workdays ────────────────────────────────────────────────
   "workdays.label": string;
   "workdays.mon": string;
@@ -103,6 +112,17 @@ export interface Messages {
   "workdays.fri": string;
   "workdays.sat": string;
   "workdays.sun": string;
+
+  // ── Settings → big week ────────────────────────────────────────────────
+  "bigWeek.toggle": string;
+  "bigWeek.extraDays": string;
+  "bigWeek.hint": string;
+  "bigWeek.thisWeek": string;
+  "bigWeek.bigWeek": string;
+  "bigWeek.smallWeek": string;
+  // A five-day week averages 21.7 workdays a month and an alternating 5/6-day week 23.9:
+  // 5 (or 5.5) days x 365.25 / 12 / 7. Keep the copy in step with those two numbers.
+  "bigWeek.monthlyWorkDaysHint": string;
 
   // ── Settings → amount mode ─────────────────────────────────────────────
   "amountMode.rolling": string;
@@ -165,6 +185,9 @@ export interface Messages {
   "validation.monthlyPositive": string;
   "validation.dailyPositive": string;
   "validation.hourlyPositive": string;
+  "validation.overtimeHours": string;
+  "validation.overtimePay": string;
+  "validation.overtimeHoursForPay": string;
   "validation.workDaysPositive": string;
   "validation.workDaysRange": string;
   "validation.workdaysMinOne": string;
@@ -177,6 +200,10 @@ export interface Messages {
   "validation.lunchSameError": string;
   "validation.nightLunchOutside": string;
   "validation.lunchOutside": string;
+  "validation.bigWeekExtraDaysEmpty": string;
+  "validation.bigWeekExtraDaysError": string;
+  "validation.bigWeekExtraDaysOverlap": string;
+  "validation.bigWeekAnchorError": string;
 
   // ── Autostart ──────────────────────────────────────────────────────────
   "autostart.error": string;

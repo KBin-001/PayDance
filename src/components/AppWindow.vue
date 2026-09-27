@@ -30,6 +30,7 @@ withDefaults(
     currencySymbol: string;
     dailyEarnText: string;
     earnedText: string;
+    effectiveHourlyRateText: string;
     firstConfigIssue: string;
     hasConfigIssues: boolean;
     hasIssue: (field: SalaryConfigIssue["field"]) => boolean;
@@ -103,6 +104,7 @@ const emit = defineEmits<{
       :amount-mode="amountMode"
       :daily-earn-text="dailyEarnText"
       :earned-text="earnedText"
+      :effective-hourly-rate-text="effectiveHourlyRateText"
       :middle-stat="middleStat"
       :snapshot="snapshot"
       :suspend-amount-pulse="isThemeSwitching"

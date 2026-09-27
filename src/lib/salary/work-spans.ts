@@ -4,6 +4,7 @@
 // Additional terms: see /legal/ADDITIONAL_TERMS.md
 
 import type { SalaryConfig } from "./config";
+import { isBigWeek } from "./week-cycle";
 import {
   dateAtMinutes,
   normalizeBreakEnd,
@@ -20,7 +21,14 @@ export function isConfiguredWorkday(date: Date, config: SalaryConfig) {
     return false;
   }
 
-  return config.workdays.includes(date.getDay());
+  const day = date.getDay();
+  if (config.workdays.includes(day)) return true;
+
+  if (!config.bigWeekEnabled || !Array.isArray(config.bigWeekExtraDays)) {
+    return false;
+  }
+
+  return isBigWeek(date, config) && config.bigWeekExtraDays.includes(day);
 }
 
 export function createWorkSpans(date: Date, config: SalaryConfig): readonly WorkSpan[] {

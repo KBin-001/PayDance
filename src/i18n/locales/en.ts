@@ -8,6 +8,8 @@ import type { Messages } from "../types";
 const en: Messages = {
   // ── Dashboard ───────────────────────────────────────────────────────────
   "dashboard.todayEarnings": "Today's Earnings",
+  "dashboard.effectiveHourlyRate": "Current rate",
+  "dashboard.perHourUnit": "/h",
   "dashboard.tapToMini":
     "Today's earnings {amount}. Double-click or press Enter to enter mini floating mode",
   "dashboard.doubleClickMini": "Double-click for mini floating mode",
@@ -49,6 +51,7 @@ const en: Messages = {
   "settings.salary": "Salary",
   "settings.workdays": "Workdays",
   "settings.workTime": "Work Hours",
+  "settings.overtime": "Overtime",
   "settings.amountAnimation": "Animation",
   "settings.amountAnimationDesc": "Amount display animation",
   "settings.currency": "Currency symbol",
@@ -92,6 +95,12 @@ const en: Messages = {
   "lunchBreak.start": "Start",
   "lunchBreak.end": "End",
 
+  // ── Settings → overtime ────────────────────────────────────────────────
+  "overtime.toggle": "Include overtime",
+  "overtime.hours": "Overtime hours",
+  "overtime.pay": "Overtime pay",
+  "overtime.unitHours": "hours",
+
   // ── Settings → workdays ────────────────────────────────────────────────
   "workdays.label": "Workdays",
   "workdays.mon": "Mon",
@@ -101,6 +110,17 @@ const en: Messages = {
   "workdays.fri": "Fri",
   "workdays.sat": "Sat",
   "workdays.sun": "Sun",
+
+  // ── Settings → big week ────────────────────────────────────────────────
+  "bigWeek.toggle": "Alternating work weeks",
+  "bigWeek.extraDays": "Extra workdays in big weeks",
+  "bigWeek.hint":
+    "The workdays above describe the small week; big weeks add the extra days picked below.",
+  "bigWeek.thisWeek": "This week is",
+  "bigWeek.bigWeek": "Big week",
+  "bigWeek.smallWeek": "Small week",
+  "bigWeek.monthlyWorkDaysHint":
+    "Alternating weeks raise the monthly average from about 21.7 workdays to about 23.9, so around 24 is usually the right value. This is only a hint; the number stays yours to set.",
 
   // ── Settings → amount mode ─────────────────────────────────────────────
   "amountMode.rolling": "Rolling",
@@ -114,8 +134,8 @@ const en: Messages = {
   "about.appVersion": "Version",
   "about.labelSeparator": ": ",
   "about.appAuthor": "Author",
-  "about.openRepo": "Open GitHub repository",
-  "about.repoError": "Unable to open GitHub repository. Please try again later.",
+  "about.openRepo": "Open PayDance on GitHub",
+  "about.repoError": "Unable to open PayDance on GitHub. Please try again later.",
 
   // ── Onboarding ─────────────────────────────────────────────────────────
   "onboarding.ariaLabel": "First-Time Setup",
@@ -164,6 +184,9 @@ const en: Messages = {
   "validation.monthlyPositive": "Monthly salary must be greater than 0",
   "validation.dailyPositive": "Daily wage must be greater than 0",
   "validation.hourlyPositive": "Hourly rate must be greater than 0",
+  "validation.overtimeHours": "Overtime hours cannot be negative",
+  "validation.overtimePay": "Overtime pay cannot be negative",
+  "validation.overtimeHoursForPay": "Enter overtime hours when overtime pay is set",
   "validation.workDaysPositive": "Work days must be greater than 0",
   "validation.workDaysRange": "Work days cannot exceed 31",
   "validation.workdaysMinOne": "Select at least 1 workday",
@@ -176,6 +199,11 @@ const en: Messages = {
   "validation.lunchSameError": "Lunch start and end times cannot be the same",
   "validation.nightLunchOutside": "Night shift lunch break must fall within work hours",
   "validation.lunchOutside": "Lunch break must fall within work hours",
+  "validation.bigWeekExtraDaysEmpty": "Select at least 1 extra workday for big weeks",
+  "validation.bigWeekExtraDaysError": "Big-week extra workdays must be days of the week",
+  "validation.bigWeekExtraDaysOverlap":
+    "Big-week extra workdays cannot repeat a small-week workday",
+  "validation.bigWeekAnchorError": "The big-week start week is invalid; align it again",
 
   // ── Autostart ──────────────────────────────────────────────────────────
   "autostart.error": "Failed to update autostart setting",

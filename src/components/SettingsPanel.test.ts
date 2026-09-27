@@ -15,15 +15,13 @@ import updateActionBadgeSource from "./settings/UpdateActionBadge.vue?raw";
 import workTimeFieldsSource from "./settings/WorkTimeFields.vue?raw";
 
 describe("settings panel", () => {
-  it("shows the about version as a plain number", () => {
+  it("shows the V1.0 display version in the about footer", () => {
     const versionLine = settingsAboutFooterSource
       .split("\n")
-      .find((line) => line.includes("{{ appVersion }}"));
-    const prefixedVersionTemplate = ["v", "{{ appVersion }}"].join("");
+      .find((line) => line.includes("{{ appDisplayVersion }}"));
 
     expect(versionLine).toBeDefined();
-    expect(versionLine).toContain("{{ appVersion }}");
-    expect(versionLine).not.toContain(prefixedVersionTemplate);
+    expect(versionLine).toContain("{{ appDisplayVersion }}");
   });
 
   it("returns settings cards to the v0.5.10 structure", () => {

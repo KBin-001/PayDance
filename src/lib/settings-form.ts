@@ -4,6 +4,7 @@
 // Additional terms: see /legal/ADDITIONAL_TERMS.md
 
 import type { SalaryConfig, SalaryType } from "./salary";
+import { mondayOfWeek, toDateKey } from "./salary/week-cycle";
 import type { Messages } from "../i18n/types";
 
 export type SettingsFormT = (
@@ -19,7 +20,12 @@ export function createSalaryTypeOptions(t: SettingsFormT) {
   ];
 }
 
-export function createWeekdayOptions(t: SettingsFormT) {
+export type WeekdayOption = {
+  value: number;
+  label: string;
+};
+
+export function createWeekdayOptions(t: SettingsFormT): WeekdayOption[] {
   return [
     { value: 1, label: t("workdays.mon") },
     { value: 2, label: t("workdays.tue") },
@@ -30,6 +36,55 @@ export function createWeekdayOptions(t: SettingsFormT) {
     { value: 0, label: t("workdays.sun") },
   ];
 }
+
+export type BigWeekExtraDayOptions = {
+  // What the picker renders: the days the small week leaves free, plus a day that is selected but
+  // has since become a small-week workday, so a choice the picker would otherwise hide from sight
+  // can still be cleared.
+  offered: WeekdayOption[];
+  // What the extra days may actually be reconciled to: only the days the small week leaves free. A
+  // day the small week already works would describe two identical weeks, which is the thing this
+  // toggle exists to avoid.
+  free: number[];
+};
+
+export function createBigWeekExtraDayOptions(
+  t: SettingsFormT,
+  workdays: readonly number[],
+  selected: readonly number[] = [],
+): BigWeekExtraDayOptions {
+  const offered = createWeekdayOptions(t).filter(
+    (option) => !workdays.includes(option.value) || selected.includes(option.value),
+  );
+
+  return {
+    offered,
+    free: offered
+      .filter((option) => !workdays.includes(option.value))
+      .map((option) => option.value),
+  };
+}
+
+// The two weeks have to differ, so an extra day the small week already works is dropped; if that
+// leaves nothing, the first day the small week leaves free takes its place. A small week that
+// covers all seven days has nothing to offer, and validation is what reports that.
+export const reconcileBigWeekExtraDays = (
+  availableDays: readonly number[],
+  extraDays: readonly number[],
+) => {
+  const kept = extraDays.filter((day) => availableDays.includes(day));
+
+  return kept.length > 0 ? kept : availableDays.slice(0, 1);
+};
+
+// Turning the toggle on makes the week the user is in a big week, so the alternation is aligned by
+// default; choosing the other week moves the anchor one week forward instead.
+export const alignBigWeekAnchor = (now: Date, thisWeekIsBig: boolean) => {
+  const monday = mondayOfWeek(now);
+  monday.setDate(monday.getDate() + (thisWeekIsBig ? 0 : 7));
+
+  return toDateKey(monday);
+};
 
 export function createGetSalaryAmountLabel(t: SettingsFormT) {
   return (salaryType: SalaryType) => {

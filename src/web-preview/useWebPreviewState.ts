@@ -131,6 +131,7 @@ export function useWebPreviewState() {
   const {
     dailyEarnText,
     earnedText,
+    effectiveHourlyRateText,
     firstConfigIssue,
     hasConfigIssues,
     hasIssue,
@@ -264,6 +265,7 @@ export function useWebPreviewState() {
     currencySymbol,
     dailyEarnText,
     earnedText,
+    effectiveHourlyRateText,
     firstConfigIssue,
     hasConfigIssues,
     hasIssue,

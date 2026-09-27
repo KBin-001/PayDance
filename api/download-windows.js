@@ -7,11 +7,11 @@
 // one EXE named after its tag, so a link that never changes has to resolve the newest tag first:
 // GitHub answers /releases/latest with a redirect to /releases/tag/<tag>, which needs no API call.
 
-export const repositoryUrl = "https://github.com/MrBaoboer/PayDance";
+export const repositoryUrl = "https://github.com/KBin-001/PayDance";
 export const releasesPageUrl = `${repositoryUrl}/releases/latest`;
 
 const releaseTagPattern = /^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
-const releaseTagPath = /^\/MrBaoboer\/PayDance\/releases\/tag\/([^/]+)$/;
+const releaseTagPath = /^\/KBin-001\/PayDance\/releases\/tag\/([^/]+)$/;
 
 export function resolveLatestTag(location) {
   if (typeof location !== "string" || location.length === 0) return null;

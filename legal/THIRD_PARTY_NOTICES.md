@@ -78,4 +78,4 @@ Web 构建通过 `src/web-preview/web-preview.css` 中的 `@font-face` 加载 `s
 
 ---
 
-如发现遗漏或错误，请提交 [Issue](https://github.com/MrBaoboer/PayDance/issues)。
+如发现遗漏或错误，请提交 [Issue](https://github.com/KBin-001/PayDance/issues)。

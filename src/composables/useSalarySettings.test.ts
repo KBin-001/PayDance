@@ -5,6 +5,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { defaultSalaryConfig } from "../lib/salary";
+import { settingsSchemaVersion } from "../lib/settings-migration";
 import {
   defaultMiniOpacityPercent,
   fullWindowSize,
@@ -97,7 +98,7 @@ describe("useSalarySettings", () => {
 
     expect(backupUnreadable).toHaveBeenCalledOnce();
     expect(storeMocks.set).toHaveBeenCalledWith("config", defaultSalaryConfig);
-    expect(storeMocks.set).toHaveBeenCalledWith("settingsVersion", 4);
+    expect(storeMocks.set).toHaveBeenCalledWith("settingsVersion", settingsSchemaVersion);
     expect(storeMocks.save).toHaveBeenCalled();
     expect(settingsSaveError.value).toBe("settings.loadRecovered");
     expect(hasCompletedOnboarding.value).toBe(false);
@@ -146,7 +147,7 @@ describe("useSalarySettings", () => {
     expect(config.value.enableLunchBreak).toBe(defaultSalaryConfig.enableLunchBreak);
     expect(settings).not.toHaveProperty("settingsRecoveryNotice");
     expect(storeMocks.set).toHaveBeenCalledWith("config", config.value);
-    expect(storeMocks.set).toHaveBeenCalledWith("settingsVersion", 4);
+    expect(storeMocks.set).toHaveBeenCalledWith("settingsVersion", settingsSchemaVersion);
     expect(storeMocks.save).toHaveBeenCalled();
   });
 

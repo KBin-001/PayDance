@@ -59,6 +59,31 @@ describe("SalaryAmountFields", () => {
     expect(wrapper.text()).not.toContain("每月工作天数");
   });
 
+  it("hints that big weeks raise the monthly work-day count, without changing it", () => {
+    const wrapper = mountSalaryAmountFields({
+      ...defaultSalaryConfig,
+      bigWeekEnabled: true,
+    });
+
+    expect(wrapper.text()).toContain("23.9");
+    // The hint is advice only: rendering it must never rewrite the user's own number.
+    expect(wrapper.emitted("update:config")).toBeUndefined();
+  });
+
+  it("keeps the hint out of a fixed weekly schedule", () => {
+    expect(mountSalaryAmountFields().text()).not.toContain("23.9");
+  });
+
+  it("keeps the hint out of a mode that has no monthly count", () => {
+    const wrapper = mountSalaryAmountFields({
+      ...defaultSalaryConfig,
+      salaryType: "daily",
+      bigWeekEnabled: true,
+    });
+
+    expect(wrapper.text()).not.toContain("23.9");
+  });
+
   it("emits a config update when salary input changes", async () => {
     const wrapper = mountSalaryAmountFields();
 

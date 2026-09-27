@@ -49,7 +49,7 @@ const expectedEarnSegments = computed<MetricSegment[]>(() => [
     <div class="stats-panel__grid">
       <article class="stat-item">
         <span class="stat-item__label">{{ t("stats.worked") }}</span>
-        <strong class="stat-item__value">
+        <strong class="stat-item__value stat-item__value--time">
           <span
             v-for="(segment, index) in formatMetricSegments(workedTime)"
             :key="`worked-${index}`"
@@ -60,7 +60,7 @@ const expectedEarnSegments = computed<MetricSegment[]>(() => [
       </article>
       <article class="stat-item">
         <span class="stat-item__label">{{ middleLabel }}</span>
-        <strong class="stat-item__value">
+        <strong class="stat-item__value stat-item__value--time">
           <span
             v-for="(segment, index) in formatMetricSegments(middleValue)"
             :key="`middle-${index}`"
@@ -141,6 +141,10 @@ const expectedEarnSegments = computed<MetricSegment[]>(() => [
   text-overflow: ellipsis;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+
+.stat-item__value--time {
+  font-size: clamp(13px, calc(10px + 0.72cqw), 15px);
 }
 
 .stat-value__number {

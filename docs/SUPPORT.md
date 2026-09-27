@@ -7,13 +7,13 @@
 - 使用、隐私和许可问题：[常见问题](FAQ.md)
 - 版本变化：[更新日志](../CHANGELOG.md)
 - 功能范围：[产品边界](PRODUCT.md)
-- 已知问题：[GitHub Issues](https://github.com/MrBaoboer/PayDance/issues)
-- 想法、用法交流和不确定算不算 Bug 的问题：[GitHub Discussions](https://github.com/MrBaoboer/PayDance/discussions)
-- macOS 版：邀请贡献中，见 [#65](https://github.com/MrBaoboer/PayDance/issues/65)
+- 已知问题：[GitHub Issues](https://github.com/KBin-001/PayDance/issues)
+- 想法、用法交流和不确定算不算 Bug 的问题：[GitHub Discussions](https://github.com/KBin-001/PayDance/discussions)
+- macOS 版：邀请贡献中，见 [#65](https://github.com/KBin-001/PayDance/issues/65)
 
 ## 提交反馈
 
-在 [Issue 选择页](https://github.com/MrBaoboer/PayDance/issues/new/choose) 使用对应表单：
+在 [Issue 选择页](https://github.com/KBin-001/PayDance/issues/new/choose) 使用对应表单：
 
 - Bug：填写版本、发生位置、复现步骤、期望结果和实际结果。
 - 功能建议：说明使用场景和希望改善的结果。平台适配建议的验证边界要求见[贡献指南](../.github/CONTRIBUTING.md)。

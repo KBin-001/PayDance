@@ -143,7 +143,7 @@ describe("PayDance Web Preview", () => {
     );
     const chineseHtmlSource = read("index.html");
     const englishHtmlSource = read("en/index.html");
-    const shareImageUrl = "https://paydance.vercel.app/og-image.jpg";
+    const shareImageUrl = "https://paydance.kbinx.com/og-image.jpg";
     const shareImage = statSync(new URL("../public/og-image.jpg", import.meta.url));
 
     expect(webPreviewSource).toContain("productLogoUrl");
@@ -206,8 +206,8 @@ describe("PayDance Web Preview", () => {
   it("publishes independent Chinese and English SEO entry points", () => {
     const chineseHtmlSource = read("index.html");
     const englishHtmlSource = read("en/index.html");
-    const chineseUrl = "https://paydance.vercel.app/";
-    const englishUrl = "https://paydance.vercel.app/en/";
+    const chineseUrl = "https://paydance.kbinx.com/";
+    const englishUrl = "https://paydance.kbinx.com/en/";
 
     expect(chineseHtmlSource).toContain('<html lang="zh-CN">');
     expect(englishHtmlSource).toContain('<html lang="en">');
@@ -647,6 +647,7 @@ describe("PayDance Web Preview", () => {
     expect(webPreviewSource).toContain("appCopyright");
     expect(webPreviewSource).toContain('class="web-preview__footer"');
     expect(webPreviewSource).toContain('class="web-preview__footer-mark"');
+    expect(webPreviewSource).toContain('href="mailto:ypeng9490@gmail.com"');
   });
 
   it("uses a compact preview stage for mini floating mode", () => {

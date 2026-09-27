@@ -3,8 +3,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 // Additional terms: see /legal/ADDITIONAL_TERMS.md
+import { computed } from "vue";
 import type { SalaryConfig } from "../../lib/salary";
-import { createWeekdayOptions, toggleWorkdayValue } from "../../lib/settings-form";
+import {
+  createWeekdayOptions,
+  toggleWorkdayValue,
+  type WeekdayOption,
+} from "../../lib/settings-form";
 import { useI18n } from "../../composables/useI18n";
 
 const { t } = useI18n();
@@ -13,7 +18,15 @@ const props = defineProps<{
   density: "settings" | "onboarding";
   invalid?: boolean;
   workdays: SalaryConfig["workdays"];
+  // A caller offering only part of the week passes the options to render, so the filtering and the
+  // labels are built once.
+  options?: WeekdayOption[];
+  label?: string;
 }>();
+
+const dayOptions = computed(() => props.options ?? createWeekdayOptions(t.value));
+
+const label = computed(() => props.label ?? t.value("workdays.label"));
 
 const emit = defineEmits<{
   "update:workdays": [workdays: SalaryConfig["workdays"]];
@@ -29,10 +42,10 @@ const toggleWorkday = (day: number) => {
     class="weekday-control"
     :class="[`weekday-control--${density}`, { 'is-invalid': invalid }]"
     role="group"
-    :aria-label="t('workdays.label')"
+    :aria-label="label"
   >
     <button
-      v-for="day in createWeekdayOptions(t)"
+      v-for="day in dayOptions"
       :key="day.value"
       :aria-pressed="workdays.includes(day.value)"
       :class="{ 'is-active': workdays.includes(day.value) }"

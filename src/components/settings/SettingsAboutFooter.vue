@@ -10,9 +10,9 @@ import { useI18n } from "../../composables/useI18n";
 import {
   appAuthor,
   appCopyright,
+  appDisplayVersion,
   appEnglishName,
   appName,
-  appVersion,
   repositoryUrl,
 } from "../../lib/app-meta";
 import UpdateActionBadge from "./UpdateActionBadge.vue";
@@ -49,7 +49,7 @@ const openRepository = async () => {
       <span class="about-footer__version-line">
         <span class="about-footer__version-text"
           >{{ t("about.appVersion") }}{{ t("about.labelSeparator")
-          }}{{ appVersion }}</span
+          }}{{ appDisplayVersion }}</span
         >
         <UpdateActionBadge :update-status="updateStatus" />
       </span>

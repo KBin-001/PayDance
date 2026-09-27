@@ -150,6 +150,7 @@ const { clearMiniDrag, startMiniDrag } = useMiniWindowDrag(appWindow);
 const {
   dailyEarnText,
   earnedText,
+  effectiveHourlyRateText,
   firstConfigIssue,
   hasConfigIssues,
   hasIssue,
@@ -308,6 +309,7 @@ onBeforeUnmount(() => {
       :autostart-error="autostartError"
       :daily-earn-text="dailyEarnText"
       :earned-text="earnedText"
+      :effective-hourly-rate-text="effectiveHourlyRateText"
       :first-config-issue="firstConfigIssue"
       :has-config-issues="hasConfigIssues"
       :has-issue="hasIssue"

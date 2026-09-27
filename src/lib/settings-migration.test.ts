@@ -4,7 +4,7 @@
 // Additional terms: see /legal/ADDITIONAL_TERMS.md
 
 import { describe, expect, it } from "vitest";
-import { defaultSalaryConfig } from "./salary";
+import { defaultSalaryConfig, validateSalaryConfig } from "./salary";
 import {
   migrateSalaryConfig,
   migrateVersionedSalaryConfig,
@@ -14,6 +14,24 @@ import {
 } from "./settings-migration";
 
 describe("settings migration", () => {
+  it("starts older settings with overtime off and preserves valid overtime values", () => {
+    const old = migrateSalaryConfig({ monthlySalary: 12000 }, 5);
+    expect(old).toMatchObject({
+      overtimeEnabled: false,
+      overtimeHours: 0,
+      overtimePay: 0,
+    });
+
+    const saved = migrateSalaryConfig(
+      { overtimeEnabled: true, overtimeHours: 1.5, overtimePay: 90 },
+      settingsSchemaVersion,
+    );
+    expect(saved).toMatchObject({
+      overtimeEnabled: true,
+      overtimeHours: 1.5,
+      overtimePay: 90,
+    });
+  });
   it("migrates v2 salary config into the v0.5 salary model", () => {
     const config = migrateSalaryConfig({
       monthlySalary: 18000,
@@ -75,8 +93,8 @@ describe("settings migration", () => {
     expect(resolveOnboardingState(undefined, true)).toBe(true);
   });
 
-  it("declares the v0.5 settings schema version", () => {
-    expect(settingsSchemaVersion).toBe(4);
+  it("declares the current settings schema version", () => {
+    expect(settingsSchemaVersion).toBe(6);
   });
 
   it("migrates saved configs through an explicit versioned chain", () => {
@@ -218,5 +236,117 @@ describe("settings migration", () => {
 
     expect(result.recoveryReason).toBe("invalid-values");
     expect(result.config.workDaysPerMonth).toBe(defaultSalaryConfig.workDaysPerMonth);
+  });
+});
+
+describe("settings migration — big week", () => {
+  // A config written before the big-week fields existed: valid, and missing all three of them.
+  const configWithoutBigWeek = {
+    salaryType: "monthly",
+    monthlySalary: 18000,
+    dailySalary: 360,
+    hourlyRate: 45,
+    workDaysPerMonth: 22,
+    workdays: [1, 2, 3, 4, 5],
+    startTime: "09:30",
+    endTime: "18:30",
+    lunchStart: "12:00",
+    lunchEnd: "13:30",
+    enableLunchBreak: false,
+  };
+
+  it("fills the big-week fields without reporting a recovery", () => {
+    const result = recoverVersionedSalaryConfig({
+      config: configWithoutBigWeek,
+      schemaVersion: settingsSchemaVersion,
+    });
+
+    expect(result.config.bigWeekEnabled).toBe(false);
+    expect(result.config.bigWeekExtraDays).toEqual([6]);
+    expect(result.config.bigWeekAnchor).toBe("");
+    expect(result.recoveryReason).toBeUndefined();
+  });
+
+  it("starts a v4 config unaligned instead of keeping its old placeholder phase", () => {
+    const result = recoverVersionedSalaryConfig({
+      config: {
+        ...configWithoutBigWeek,
+        bigWeekEnabled: true,
+        bigWeekAnchor: "2026-01-05",
+      },
+      schemaVersion: 4,
+    });
+
+    expect(result.config.bigWeekAnchor).toBe("");
+    // That anchor was never a phase the user picked, so the toggle cannot stay on with it.
+    expect(result.config.bigWeekEnabled).toBe(false);
+    expect(result.recoveryReason).toBe("invalid-values");
+  });
+
+  it("leaves a recovered config in a state that passes validation", () => {
+    const result = recoverVersionedSalaryConfig({
+      config: {
+        ...configWithoutBigWeek,
+        bigWeekEnabled: true,
+        bigWeekAnchor: "not-a-date",
+      },
+      schemaVersion: settingsSchemaVersion,
+    });
+
+    expect(result.config.bigWeekAnchor).toBe("");
+    expect(result.config.bigWeekEnabled).toBe(false);
+    expect(validateSalaryConfig(result.config, (key) => key)).toHaveLength(0);
+  });
+
+  it("keeps the toggle off when upgrading an older schema", () => {
+    const result = recoverVersionedSalaryConfig({
+      config: configWithoutBigWeek,
+      schemaVersion: 3,
+    });
+
+    expect(result.config.bigWeekEnabled).toBe(false);
+    expect(result.recoveryReason).toBeUndefined();
+  });
+
+  it("falls back to safe big-week values when they are invalid", () => {
+    const result = recoverVersionedSalaryConfig({
+      config: {
+        ...configWithoutBigWeek,
+        bigWeekEnabled: "yes",
+        bigWeekExtraDays: [9],
+        bigWeekAnchor: "not-a-date",
+      },
+      schemaVersion: settingsSchemaVersion,
+    });
+
+    expect(result.config.bigWeekEnabled).toBe(false);
+    expect(result.config.bigWeekExtraDays).toEqual([6]);
+    expect(result.config.bigWeekAnchor).toBe("");
+    expect(result.recoveryReason).toBe("invalid-values");
+  });
+
+  it("keeps an aligned phase across a reload", () => {
+    const result = recoverVersionedSalaryConfig({
+      config: {
+        ...configWithoutBigWeek,
+        bigWeekEnabled: true,
+        bigWeekAnchor: "2026-05-13",
+      },
+      schemaVersion: settingsSchemaVersion,
+    });
+
+    expect(result.config.bigWeekEnabled).toBe(true);
+    expect(result.config.bigWeekAnchor).toBe("2026-05-11");
+    expect(result.recoveryReason).toBeUndefined();
+  });
+
+  it("sorts and de-duplicates the extra days", () => {
+    const result = recoverVersionedSalaryConfig({
+      config: { ...configWithoutBigWeek, bigWeekExtraDays: [0, 6, 6] },
+      schemaVersion: settingsSchemaVersion,
+    });
+
+    expect(result.config.bigWeekExtraDays).toEqual([0, 6]);
+    expect(result.recoveryReason).toBeUndefined();
   });
 });

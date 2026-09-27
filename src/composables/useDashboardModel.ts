@@ -29,7 +29,15 @@ export function useDashboardModel(
 ) {
   const earnedText = computed(() => formatYuan(snapshot.value.earnedToday, locale.value));
   const dailyEarnText = computed(() =>
-    formatYuan(snapshot.value.dailySalary, locale.value),
+    formatYuan(
+      snapshot.value.dailySalary +
+        (config.value.overtimeEnabled &&
+        snapshot.value.status !== "rest-day" &&
+        snapshot.value.status !== "invalid-config"
+          ? config.value.overtimePay
+          : 0),
+      locale.value,
+    ),
   );
   const salaryModeLabel = computed(() => {
     if (config.value.salaryType === "daily") return t("salaryMode.dailyLong");
@@ -49,6 +57,14 @@ export function useDashboardModel(
   );
   const workedTimeText = computed(() =>
     formatDashboardDuration(snapshot.value.elapsedWorkMs),
+  );
+  // While the config is invalid the rate is unknown rather than zero, so the dashboard drops the
+  // line instead of reporting a number it cannot stand behind. A rest day still reads zero: there
+  // the day genuinely earns nothing.
+  const effectiveHourlyRateText = computed(() =>
+    hasConfigIssues.value
+      ? ""
+      : formatYuan(snapshot.value.effectiveHourlyRate, locale.value),
   );
   const middleStat = computed<DashboardMiddleStat>(() => {
     if (hasConfigIssues.value) {
@@ -89,6 +105,7 @@ export function useDashboardModel(
   return {
     dailyEarnText,
     earnedText,
+    effectiveHourlyRateText,
     firstConfigIssue,
     hasConfigIssues,
     hasIssue,

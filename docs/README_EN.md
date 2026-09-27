@@ -12,14 +12,14 @@
 <p align="center">
   <a href="https://paydance.vercel.app/en/"><strong>Live Preview</strong></a>
   &nbsp;&nbsp;·&nbsp;&nbsp;
-  <a href="https://github.com/MrBaoboer/PayDance/releases/latest"><strong>Download</strong></a>
+  <a href="https://github.com/KBin-001/PayDance/releases/latest"><strong>Download</strong></a>
   &nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="../README.md">中文</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/MrBaoboer/PayDance/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/MrBaoboer/PayDance?style=flat&label=release&labelColor=1F2328&color=F59E0B"></a>
-  <a href="https://github.com/MrBaoboer/PayDance/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/MrBaoboer/PayDance/total?style=flat&label=downloads&labelColor=1F2328&color=3D444D"></a>
+  <a href="https://github.com/KBin-001/PayDance/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/KBin-001/PayDance?style=flat&label=release&labelColor=1F2328&color=F59E0B"></a>
+  <a href="https://github.com/KBin-001/PayDance/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/KBin-001/PayDance/total?style=flat&label=downloads&labelColor=1F2328&color=3D444D"></a>
   <a href="../LICENSE"><img alt="License" src="https://img.shields.io/badge/license-AGPL--3.0--only-3D444D?style=flat&labelColor=1F2328"></a>
 </p>
 
@@ -29,7 +29,7 @@
 
 PayDance (薪跳) is a desktop real-time salary dashboard. Set your salary and working hours, and it shows your income growing second by second on your desktop, making the value of your working time visible.
 
-The main window shows today's earnings, work progress, time remaining, and daily estimate. The mini floating window keeps only the amount, ready for a quick glance from the corner of your screen.
+The main window shows today's earnings, the current rate, work progress, time remaining, and daily estimate. The mini floating window keeps only the amount, ready for a quick glance from the corner of your screen.
 
 <p align="center">
   <img src="posters/poster-02-three-step-setup-en-v1.png" alt="PayDance first-time setup in three steps" width="100%">
@@ -38,7 +38,8 @@ The main window shows today's earnings, work progress, time remaining, and daily
 ## Features
 
 - **Live earnings**: Today's amount updates continuously and is shown to two decimal places.
-- **Common pay schedules**: Supports monthly, daily, and hourly pay, configurable workdays, lunch-break exclusion, and overnight shifts.
+- **Live effective hourly rate**: A "Current rate" line under today's earnings divides them by the hours worked today, so it falls while unpaid overtime accumulates.
+- **Common pay schedules**: Supports monthly, daily, and hourly pay, configurable workdays, alternating big and small weeks, lunch-break exclusion, and overnight shifts.
 - **Mini window**: Shows only the amount, stays draggable and always on top, and supports 10%–100% opacity. Double-click it to restore the main window.
 - **Local-first**: No account required; your salary settings stay on your own machine.
 - **Bilingual UI**: The interface, tray menu, and validation messages support Simplified Chinese and English.

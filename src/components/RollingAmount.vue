@@ -238,7 +238,7 @@ onBeforeUnmount(() => {
 }
 
 .rolling-amount--hero .rolling-amount__currency {
-  color: var(--muted);
+  color: var(--income-accent);
   font-size: 0.74em;
   transform: translateY(-0.08em);
 }
@@ -269,10 +269,6 @@ onBeforeUnmount(() => {
 
 .rolling-amount--hero.is-ticking {
   filter: drop-shadow(0 14px 30px var(--income-accent-glow));
-}
-
-.rolling-amount--hero.is-ticking .rolling-amount__currency {
-  color: var(--income-accent);
 }
 
 @media (prefers-reduced-motion: reduce) {

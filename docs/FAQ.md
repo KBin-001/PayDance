@@ -12,7 +12,7 @@
 
 ### 该下载哪个文件？
 
-在 [最新 Release](https://github.com/MrBaoboer/PayDance/releases/latest) 里下载 `pay-dance-v<版本>-windows-x64.exe`，每个 Release 只有这一个 EXE；官网的下载按钮会自动跳到当前最新版本的这个文件。同一页面的 `.sha256` 文件用于核对完整性：
+在 [最新 Release](https://github.com/KBin-001/PayDance/releases/latest) 里下载 `pay-dance-v<版本>-windows-x64.exe`，每个 Release 只有这一个 EXE；官网的下载按钮会自动跳到当前最新版本的这个文件。同一页面的 `.sha256` 文件用于核对完整性：
 
 ```powershell
 Get-FileHash .\pay-dance-v<版本>-windows-x64.exe -Algorithm SHA256
@@ -49,6 +49,16 @@ Remove-Item "$env:APPDATA\com.masterbao.paydance\salary-settings.json"
 
 你可以选择月薪、日薪或时薪。PayDance 先按工作日、上下班时间和午休设置算出当天的有效工作时长，再折算出当天应得：月薪除以设置里的「每月工作天数」，日薪直接取用，时薪乘以有效工作时长。今日入账按已经过的有效工作时间同比例累加。
 
+### 「当前时薪」是怎么算的？
+
+它是金额下方那一行，等于今日入账 ÷ 今日已工作时长。正常上班期间，入账本来就按有效工时同比例累加，所以这一段它恰好等于设置换算出的时薪——日薪 375、每天 8 小时就是 ¥46.88/h，一整天都稳定在这个数，不会抖。
+
+过了下班时间还在工作时，入账不再增加（PayDance 的估算不含加班费），「已工作」却继续走，于是这个数字被如实摊薄：同样的日薪 375 元，加班 2 小时后是 375 ÷ 10 = ¥37.50/h。加班最多计 4 小时，超过之后数字冻结——程序分不清你是还在工位，还是窗口忘了关，所以不再继续往下调。
+
+上班前显示的是设置换算出的时薪，休息日显示 ¥0.00/h，配置待修正时这一行不显示。
+
+薪资说明里的「时薪」是你填的设置换算出的名义时薪，看板上的「当前时薪」是当天的实际时薪。正常上班期间两者是同一个数，只有进入加班时段才会分叉。
+
 ### 午休时间会计入计算吗？
 
 取决于你的设置。启用午休剔除后，午休时段不计入有效工作时间；如果你的薪资规则不扣午休，关掉这个选项即可。
@@ -57,13 +67,21 @@ Remove-Item "$env:APPDATA\com.masterbao.paydance\salary-settings.json"
 
 支持。下班时间早于上班时间时按跨零点班次处理，过零点后继续累计同一班次的收入。
 
+### 大小周怎么设置？
+
+在「每周工作日」里打开「大小周模式」。打开后，工作日选择器表示工作日较少的小周，下面出现「大周额外工作日」（默认周六，只能从小周没占用的日子里挑）；尚未对齐过的配置会在打开开关时以本周为大周对齐，之后按周自动交替。如果这周排错了，用旁边的「本周是」拨一下即可——关掉开关再打开不会重置已经对齐的相位。
+
+### 大小周模式下「每月工作天数」该填多少？
+
+大小周把月均工作天数从约 21.7 天抬到约 23.9 天，月薪口径下建议填 24 左右；仍填 22 的话，每天折算出的金额会偏高。PayDance 只在设置里给出这句提示，不会替你改这个数字。
+
 ### 金额为 0 或一直不动？
 
 先看标题栏左侧的状态：「今日休息」说明今天不在设置的工作日里；「未到上班」「已下班」说明当前时间不在上下班区间内；「午休中」说明启用了午休剔除；「配置待修正」说明有设置项无效，打开设置会看到具体是哪一项。以上都不是时，检查系统时间和时区是否正确。
 
 ### 显示金额等于真实到账工资吗？
 
-不等于。它是基于你输入的薪资与时间设置得到的实时估算，不含税费、社保、公积金、奖金、请假、加班和公司内部薪资规则。
+不等于。它是基于你输入的薪资与时间设置得到的实时估算，不含税费、社保、公积金、奖金、请假、加班费和公司内部薪资规则。下班后仍在工作的时间会照实计入「已工作」与「当前时薪」，但不会让估算金额增加。
 
 ## 隐私与本地数据
 
@@ -91,7 +109,7 @@ Windows 桌面版通过 Tauri Store 保存在 `%APPDATA%\com.masterbao.paydance\
 
 ### 自动更新失败怎么办？
 
-更新需要能访问 GitHub，并且 EXE 所在文件夹可写。失败时设置底部会出现「更新失败，点击重试」；重试仍失败，从 [最新 Release](https://github.com/MrBaoboer/PayDance/releases/latest) 下载新版 EXE 覆盖旧文件即可，设置不会丢失。
+更新需要能访问 GitHub，并且 EXE 所在文件夹可写。失败时设置底部会出现「更新失败，点击重试」；重试仍失败，从 [最新 Release](https://github.com/KBin-001/PayDance/releases/latest) 下载新版 EXE 覆盖旧文件即可，设置不会丢失。
 
 ### 设置文件无法读取怎么办？
 
@@ -113,7 +131,7 @@ Windows 桌面版通过 Tauri Store 保存在 `%APPDATA%\com.masterbao.paydance\
 
 ### 有 macOS 或 Linux 版吗？
 
-目前只有 Windows 桌面版和网页版。macOS 版正在邀请社区贡献，方案讨论与进度见 [#65](https://github.com/MrBaoboer/PayDance/issues/65)。
+目前只有 Windows 桌面版和网页版。macOS 版正在邀请社区贡献，方案讨论与进度见 [#65](https://github.com/KBin-001/PayDance/issues/65)。
 
 ## 贡献与反馈
 
@@ -127,4 +145,4 @@ Windows 桌面版通过 Tauri Store 保存在 `%APPDATA%\com.masterbao.paydance\
 
 ### 开发者从哪里开始？
 
-先读 [贡献指南](../.github/CONTRIBUTING.md)。当前公开的协作入口是 macOS 版邀请（[#65](https://github.com/MrBaoboer/PayDance/issues/65)）和带 `help wanted` 标签的 Issue；想法和问题可以直接发到 [Discussions](https://github.com/MrBaoboer/PayDance/discussions)。文档和测试通常不需要完整的 Windows 桌面环境。
+先读 [贡献指南](../.github/CONTRIBUTING.md)。当前公开的协作入口是 macOS 版邀请（[#65](https://github.com/KBin-001/PayDance/issues/65)）和带 `help wanted` 标签的 Issue；想法和问题可以直接发到 [Discussions](https://github.com/KBin-001/PayDance/discussions)。文档和测试通常不需要完整的 Windows 桌面环境。

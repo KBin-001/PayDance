@@ -23,7 +23,7 @@ import { homedir } from "node:os";
 import { join, win32 } from "node:path";
 import { pathToFileURL } from "node:url";
 
-const repository = process.env.GITHUB_REPOSITORY || "MrBaoboer/PayDance";
+const repository = process.env.GITHUB_REPOSITORY || "KBin-001/PayDance";
 
 export const csvHeader = "date,tag,asset,download_count";
 

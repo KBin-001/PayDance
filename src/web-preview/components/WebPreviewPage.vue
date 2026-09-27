@@ -8,9 +8,9 @@ import productLogoUrl from "../../../src-tauri/icons/icon.png";
 import { provideI18n } from "../../composables/useI18n";
 import {
   appCopyright,
+  appDisplayVersion,
   appEnglishName,
   appName,
-  appVersion,
   repositoryUrl,
   windowsDownloadUrl,
 } from "../../lib/app-meta";
@@ -63,7 +63,7 @@ onBeforeUnmount(() => {
     <WebPreviewTopbar
       :app-english-name="appEnglishName"
       :app-name="appName"
-      :app-version="appVersion"
+      :app-version="appDisplayVersion"
       :product-homepage-url="productHomepageUrl"
       :product-logo-url="productLogoUrl"
     />

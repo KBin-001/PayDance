@@ -3,9 +3,9 @@
 //
 // Additional terms: see /legal/ADDITIONAL_TERMS.md
 
-const siteUrl = "https://paydance.vercel.app/";
+const siteUrl = "https://paydance.kbinx.com/";
 const englishSiteUrl = `${siteUrl}en/`;
-const repositoryUrl = "https://github.com/MrBaoboer/PayDance";
+const repositoryUrl = "https://github.com/KBin-001/PayDance";
 
 // Mirrors web.heroHeadline1 / heroHeadline2 / heroLead / downloadWindows in src/i18n/locales;
 // scripts/web-seo.test.js keeps both in sync.

@@ -4,14 +4,14 @@
 // Additional terms: see /legal/ADDITIONAL_TERMS.md
 
 export function formatDashboardDuration(ms: number) {
-  if (!Number.isFinite(ms) || ms <= 0) return "0m";
+  if (!Number.isFinite(ms) || ms <= 0) return "0m 00s";
 
-  const totalMinutes = Math.floor(ms / 60_000);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
+  const totalSeconds = Math.floor(ms / 1_000);
+  const hours = Math.floor(totalSeconds / 3_600);
+  const minutes = Math.floor(totalSeconds / 60) % 60;
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
 
-  if (hours <= 0) return `${minutes}m`;
-  if (minutes <= 0) return `${hours}h`;
+  if (hours <= 0) return `${minutes}m ${seconds}s`;
 
-  return `${hours}h ${minutes}m`;
+  return `${hours}h ${minutes}m ${seconds}s`;
 }

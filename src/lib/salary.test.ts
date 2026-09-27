@@ -30,6 +30,10 @@ const vt = (key: string) => {
     "validation.lunchSameError": "午休起止时间不能相同",
     "validation.nightLunchOutside": "夜班午休需在工时内",
     "validation.lunchOutside": "午休需在工时内",
+    "validation.bigWeekExtraDaysEmpty": "至少选 1 个大周额外工作日",
+    "validation.bigWeekExtraDaysError": "大周额外工作日必须是一周中的某天",
+    "validation.bigWeekExtraDaysOverlap": "大周额外工作日不能与小周工作日重复",
+    "validation.bigWeekAnchorError": "大周起始周无效，请重新对齐",
   };
   return map[key] ?? key;
 };
@@ -562,5 +566,405 @@ describe("validateSalaryConfig bounds", () => {
     );
 
     expect(issues).toEqual([{ field: "workTime", message: "午休起止时间不能相同" }]);
+  });
+});
+
+describe("big week (大小周)", () => {
+  // 2026-05-11 is a Monday; 2026-05-16 is the Saturday of that same week.
+  const bigWeekConfig: SalaryConfig = {
+    ...config,
+    bigWeekEnabled: true,
+    bigWeekExtraDays: [6],
+    bigWeekAnchor: "2026-05-11",
+  };
+
+  it("works the extra day of a big week", () => {
+    const snapshot = calculateSalarySnapshot(
+      new Date("2026-05-16T10:00:00"),
+      bigWeekConfig,
+    );
+
+    expect(snapshot.status).toBe("working");
+  });
+
+  it("rests on the same weekday of a small week", () => {
+    const snapshot = calculateSalarySnapshot(
+      new Date("2026-05-23T10:00:00"),
+      bigWeekConfig,
+    );
+
+    expect(snapshot.status).toBe("rest-day");
+    expect(snapshot.earnedToday).toBe(0);
+  });
+
+  it("accrues pay across the extra day of a big week", () => {
+    const morning = calculateSalarySnapshot(
+      new Date("2026-05-16T10:00:00"),
+      bigWeekConfig,
+    );
+    const evening = calculateSalarySnapshot(
+      new Date("2026-05-16T17:00:00"),
+      bigWeekConfig,
+    );
+
+    expect(evening.earnedToday).toBeGreaterThan(morning.earnedToday);
+  });
+
+  it("keeps the shared weekdays working in both weeks", () => {
+    // 2026-05-13 and 2026-05-20 are the Wednesdays of the big and the small week.
+    expect(
+      calculateSalarySnapshot(new Date("2026-05-13T10:00:00"), bigWeekConfig).status,
+    ).toBe("working");
+    expect(
+      calculateSalarySnapshot(new Date("2026-05-20T10:00:00"), bigWeekConfig).status,
+    ).toBe("working");
+  });
+
+  it("alternates in the weeks before the anchor", () => {
+    // One week before the anchor week is small, two weeks before is big again.
+    expect(
+      calculateSalarySnapshot(new Date("2026-05-09T10:00:00"), bigWeekConfig).status,
+    ).toBe("rest-day");
+    expect(
+      calculateSalarySnapshot(new Date("2026-05-02T10:00:00"), bigWeekConfig).status,
+    ).toBe("working");
+  });
+
+  it("reads any day of the anchor week as the same phase", () => {
+    const wednesdayAnchor: SalaryConfig = {
+      ...bigWeekConfig,
+      bigWeekAnchor: "2026-05-13",
+    };
+
+    expect(
+      calculateSalarySnapshot(new Date("2026-05-16T10:00:00"), wednesdayAnchor, vt)
+        .status,
+    ).toBe("working");
+    expect(
+      calculateSalarySnapshot(new Date("2026-05-23T10:00:00"), wednesdayAnchor, vt)
+        .status,
+    ).toBe("rest-day");
+  });
+
+  it("alternates across a month boundary", () => {
+    expect(
+      calculateSalarySnapshot(new Date("2026-05-30T10:00:00"), bigWeekConfig).status,
+    ).toBe("working");
+    expect(
+      calculateSalarySnapshot(new Date("2026-06-06T10:00:00"), bigWeekConfig).status,
+    ).toBe("rest-day");
+  });
+
+  it("alternates across a year boundary", () => {
+    const yearEndConfig: SalaryConfig = {
+      ...bigWeekConfig,
+      bigWeekAnchor: "2026-12-28",
+    };
+
+    expect(
+      calculateSalarySnapshot(new Date("2027-01-02T10:00:00"), yearEndConfig).status,
+    ).toBe("working");
+    expect(
+      calculateSalarySnapshot(new Date("2027-01-09T10:00:00"), yearEndConfig).status,
+    ).toBe("rest-day");
+  });
+
+  it("ignores the extra days while the toggle is off", () => {
+    const disabled: SalaryConfig = { ...bigWeekConfig, bigWeekEnabled: false };
+    const saturday = new Date("2026-05-16T10:00:00");
+    const wednesday = new Date("2026-05-13T10:00:00");
+
+    expect(calculateSalarySnapshot(saturday, disabled)).toEqual(
+      calculateSalarySnapshot(saturday, config),
+    );
+    expect(calculateSalarySnapshot(wednesday, disabled)).toEqual(
+      calculateSalarySnapshot(wednesday, config),
+    );
+  });
+
+  it("reports an unreadable anchor instead of silently resting", () => {
+    const broken: SalaryConfig = { ...bigWeekConfig, bigWeekAnchor: "2026-02-31" };
+
+    expect(calculateSalarySnapshot(new Date("2026-05-16T10:00:00"), broken).status).toBe(
+      "invalid-config",
+    );
+    expect(validateSalaryConfig(broken, vt).map((issue) => issue.field)).toContain(
+      "bigWeekAnchor",
+    );
+  });
+});
+
+describe("big week night shifts (大小周跨零点夜班)", () => {
+  // 2026-05-11 is a Monday, so 05-15 is the Friday of the big week and 05-22 the Friday of the
+  // small one; 05-16 and 05-23 are their Saturdays.
+  const nightShiftConfig: SalaryConfig = {
+    ...config,
+    startTime: "22:00",
+    endTime: "06:00",
+    enableLunchBreak: false,
+    bigWeekEnabled: true,
+    bigWeekExtraDays: [6],
+    bigWeekAnchor: "2026-05-11",
+  };
+
+  it("runs a Friday night shift past midnight into a big-week Saturday", () => {
+    const snapshot = calculateSalarySnapshot(
+      new Date("2026-05-16T02:00:00"),
+      nightShiftConfig,
+    );
+
+    expect(snapshot.status).toBe("working");
+    expect(snapshot.elapsedWorkMs).toBe(4 * 3_600_000);
+    expect(snapshot.isNightWork).toBe(true);
+  });
+
+  it("runs a Friday night shift past midnight into a small-week Saturday", () => {
+    const snapshot = calculateSalarySnapshot(
+      new Date("2026-05-23T02:00:00"),
+      nightShiftConfig,
+    );
+
+    expect(snapshot.status).toBe("working");
+    expect(snapshot.elapsedWorkMs).toBe(4 * 3_600_000);
+  });
+
+  it("works a big-week Saturday night through to Sunday", () => {
+    const snapshot = calculateSalarySnapshot(
+      new Date("2026-05-17T02:00:00"),
+      nightShiftConfig,
+    );
+
+    expect(snapshot.status).toBe("working");
+    expect(snapshot.isNightWork).toBe(true);
+  });
+
+  it("rests on a small-week Saturday night", () => {
+    const snapshot = calculateSalarySnapshot(
+      new Date("2026-05-24T02:00:00"),
+      nightShiftConfig,
+    );
+
+    expect(snapshot.status).toBe("rest-day");
+    expect(snapshot.earnedToday).toBe(0);
+  });
+
+  it("reports the finished night shift after a big-week Saturday night", () => {
+    const snapshot = calculateSalarySnapshot(
+      new Date("2026-05-17T07:00:00"),
+      nightShiftConfig,
+    );
+
+    expect(snapshot.status).toBe("after-work");
+    expect(snapshot.isNightWork).toBe(true);
+  });
+});
+
+describe("effective hourly rate (实际时薪)", () => {
+  // ¥375 for the 8-hour day above, with no overtime pay of any kind.
+  const unpaidOvertimeConfig: SalaryConfig = {
+    ...config,
+    salaryType: "daily",
+    dailySalary: 375,
+  };
+
+  it("includes configured overtime hours and pay, and keeps the old rate when disabled", () => {
+    const overtimeConfig = {
+      ...unpaidOvertimeConfig,
+      overtimeEnabled: true,
+      overtimeHours: 2,
+      overtimePay: 100,
+    };
+    const before = calculateSalarySnapshot(at("10:00"), overtimeConfig);
+    const halfway = calculateSalarySnapshot(at("19:00"), overtimeConfig);
+    const complete = calculateSalarySnapshot(at("20:00"), overtimeConfig);
+    const disabled = calculateSalarySnapshot(at("20:00"), {
+      ...overtimeConfig,
+      overtimeEnabled: false,
+    });
+
+    expect(before.effectiveHourlyRate).toBe(47.5);
+    expect(before.earnedToday).toBe(375 / 8);
+    expect(halfway.earnedToday).toBe(425);
+    expect(complete.earnedToday).toBe(475);
+    expect(complete.effectiveHourlyRate).toBe(47.5);
+    expect(disabled.earnedToday).toBe(375);
+    expect(disabled.effectiveHourlyRate).toBe(37.5);
+  });
+
+  it("rejects invalid enabled overtime inputs", () => {
+    const issues = validateSalaryConfig(
+      {
+        ...unpaidOvertimeConfig,
+        overtimeEnabled: true,
+        overtimeHours: 0,
+        overtimePay: 20,
+      },
+      vt,
+    );
+    expect(issues.some((issue) => issue.field === "overtimeHours")).toBe(true);
+  });
+
+  it("accrues configured overtime pay beyond the automatic four-hour cap", () => {
+    const snapshot = calculateSalarySnapshot(at("23:00"), {
+      ...unpaidOvertimeConfig,
+      overtimeEnabled: true,
+      overtimeHours: 5,
+      overtimePay: 100,
+    });
+    expect(snapshot.earnedToday).toBe(475);
+    expect(snapshot.effectiveHourlyRate).toBeCloseTo(475 / 13);
+  });
+
+  it("equals the configured hourly rate while working normally, in every salary mode", () => {
+    // All three modes describe the same 8-hour day: ¥1000/day, ¥900/day, ¥90/h.
+    const monthly = calculateSalarySnapshot(at("10:00"), config);
+    const daily = calculateSalarySnapshot(at("10:00"), {
+      ...config,
+      salaryType: "daily",
+      dailySalary: 900,
+    });
+    const hourly = calculateSalarySnapshot(at("10:00"), {
+      ...config,
+      salaryType: "hourly",
+      hourlyRate: 90,
+    });
+
+    expect(monthly.effectiveHourlyRate).toBe(125);
+    expect(daily.effectiveHourlyRate).toBe(112.5);
+    expect(hourly.effectiveHourlyRate).toBe(90);
+  });
+
+  it("drops while overtime hours earn nothing extra", () => {
+    // The worked example from the spec: ¥375 for an 8-hour day, then two unpaid overtime hours.
+    const normalHours = calculateSalarySnapshot(at("10:00"), unpaidOvertimeConfig);
+    const overtime = calculateSalarySnapshot(at("20:00"), unpaidOvertimeConfig);
+
+    expect(normalHours.effectiveHourlyRate).toBe(46.875);
+    expect(overtime.status).toBe("after-work");
+    expect(overtime.earnedToday).toBe(375);
+    expect(overtime.progress).toBe(1);
+    expect(overtime.elapsedWorkMs).toBe(10 * 3_600_000);
+    expect(overtime.effectiveHourlyRate).toBe(37.5);
+  });
+
+  it("stops counting overtime at four hours past the end time", () => {
+    // 18:00 end: 22:00 is the fourth overtime hour, 23:00 is already past the point where the
+    // program still assumes the user is at work.
+    const atCap = calculateSalarySnapshot(at("22:00"), unpaidOvertimeConfig);
+    const pastCap = calculateSalarySnapshot(at("23:00"), unpaidOvertimeConfig);
+
+    expect(atCap.elapsedWorkMs).toBe(12 * 3_600_000);
+    expect(atCap.effectiveHourlyRate).toBe(31.25);
+    expect(pastCap.elapsedWorkMs).toBe(atCap.elapsedWorkMs);
+    expect(pastCap.effectiveHourlyRate).toBe(atCap.effectiveHourlyRate);
+  });
+
+  it("holds through the lunch break", () => {
+    const beforeLunch = calculateSalarySnapshot(at("12:00"), config);
+    const duringLunch = calculateSalarySnapshot(at("12:30"), config);
+
+    expect(duringLunch.effectiveHourlyRate).toBe(beforeLunch.effectiveHourlyRate);
+  });
+
+  it("shows the configured rate before work starts", () => {
+    const snapshot = calculateSalarySnapshot(at("08:59"), config);
+
+    expect(snapshot.elapsedWorkMs).toBe(0);
+    expect(snapshot.effectiveHourlyRate).toBe(125);
+  });
+
+  it("is zero on a rest day and zero while the config is invalid", () => {
+    const restDay = calculateSalarySnapshot(new Date("2026-05-10T10:00:00"), config);
+    const invalid = calculateSalarySnapshot(at("10:00"), {
+      ...config,
+      salaryType: "daily",
+      dailySalary: 0,
+    });
+
+    expect(restDay.status).toBe("rest-day");
+    expect(restDay.effectiveHourlyRate).toBe(0);
+    expect(invalid.status).toBe("invalid-config");
+    expect(invalid.effectiveHourlyRate).toBe(0);
+  });
+
+  it("dilutes an overtime hour after an overnight shift and starts fresh on the next one", () => {
+    const nightShiftConfig: SalaryConfig = {
+      ...config,
+      salaryType: "daily",
+      dailySalary: 900,
+      workdays: [1, 2],
+      startTime: "22:00",
+      endTime: "06:00",
+      enableLunchBreak: false,
+    };
+
+    // Monday 22:00–06:00 earns ¥900; 07:00 the next morning is one unpaid overtime hour.
+    const afterNightShift = calculateSalarySnapshot(
+      new Date("2026-05-12T07:00:00"),
+      nightShiftConfig,
+    );
+    // That night's own shift starts at 22:00, half an hour before this reading.
+    const nextShift = calculateSalarySnapshot(
+      new Date("2026-05-12T22:30:00"),
+      nightShiftConfig,
+    );
+
+    expect(afterNightShift.status).toBe("after-work");
+    expect(afterNightShift.elapsedWorkMs).toBe(9 * 3_600_000);
+    expect(afterNightShift.effectiveHourlyRate).toBe(100);
+    expect(nextShift.status).toBe("working");
+    expect(nextShift.elapsedWorkMs).toBe(30 * 60_000);
+    expect(nextShift.effectiveHourlyRate).toBe(112.5);
+  });
+});
+
+describe("validateSalaryConfig big week", () => {
+  const enabled: SalaryConfig = {
+    ...config,
+    bigWeekEnabled: true,
+    bigWeekExtraDays: [6],
+    bigWeekAnchor: "2026-05-11",
+  };
+
+  it("accepts an enabled big week", () => {
+    expect(validateSalaryConfig(enabled, vt)).toHaveLength(0);
+  });
+
+  it("reports an enabled big week that has no extra day", () => {
+    expect(validateSalaryConfig({ ...enabled, bigWeekExtraDays: [] }, vt)).toEqual([
+      { field: "bigWeekExtraDays", message: "至少选 1 个大周额外工作日" },
+    ]);
+  });
+
+  it("reports an extra day that repeats a small-week workday", () => {
+    expect(validateSalaryConfig({ ...enabled, bigWeekExtraDays: [1, 6] }, vt)).toEqual([
+      { field: "bigWeekExtraDays", message: "大周额外工作日不能与小周工作日重复" },
+    ]);
+  });
+
+  it("reports an extra day that is not a day of the week", () => {
+    expect(validateSalaryConfig({ ...enabled, bigWeekExtraDays: [7] }, vt)).toEqual([
+      { field: "bigWeekExtraDays", message: "大周额外工作日必须是一周中的某天" },
+    ]);
+  });
+
+  it("reports an anchor that is not a date", () => {
+    expect(validateSalaryConfig({ ...enabled, bigWeekAnchor: "2026-02-31" }, vt)).toEqual(
+      [{ field: "bigWeekAnchor", message: "大周起始周无效，请重新对齐" }],
+    );
+  });
+
+  it("ignores the big-week fields while the toggle is off", () => {
+    const issues = validateSalaryConfig(
+      {
+        ...config,
+        bigWeekEnabled: false,
+        bigWeekExtraDays: [],
+        bigWeekAnchor: "not-a-date",
+      },
+      vt,
+    );
+
+    expect(issues).toHaveLength(0);
   });
 });

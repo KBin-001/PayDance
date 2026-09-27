@@ -60,7 +60,7 @@
 
 ## 官方版本说明
 
-除非另有公告，PayDance 官方发布渠道仅包括 [MrBaoboer/PayDance 仓库](https://github.com/MrBaoboer/PayDance)、该仓库的 [GitHub Releases](https://github.com/MrBaoboer/PayDance/releases)、[Vercel 主站](https://paydance.vercel.app/)和 [GitHub Pages 镜像](https://mrbaoboer.github.io/PayDance/)。Vercel 主站是规范官网。
+除非另有公告，PayDance 官方发布渠道仅包括 [KBin-001/PayDance 仓库](https://github.com/KBin-001/PayDance)、该仓库的 [GitHub Releases](https://github.com/KBin-001/PayDance/releases)、[Vercel 主站](https://paydance.vercel.app/)和 [GitHub Pages 镜像](https://mrbaoboer.github.io/PayDance/)。Vercel 主站是规范官网。
 
 ## 授权
 
